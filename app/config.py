@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
+        env_ignore_empty=True,
     )
 
     # General
@@ -24,6 +25,7 @@ class Settings(BaseSettings):
     # LLM provider secrets
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
+    openai_base_url: str | None = None
 
     # Models (small, cheap models for development)
     openai_model: str = "gpt-5-nano"
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
 
     # Safety limits for LLM calls
     llm_timeout_seconds: float = 30.0
-    llm_max_output_tokens: int = 500
+    llm_max_output_tokens: int = 1000
 
 
 @lru_cache
