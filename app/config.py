@@ -1,0 +1,40 @@
+"""Application settings, loaded from environment variables and the .env file."""
+
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """All configuration for the app lives here, in one typed place."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    # General
+    app_name: str = "FDE Sprint API"
+    environment: Literal["dev", "staging", "prod"] = "dev"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+
+    # LLM provider secrets
+    openai_api_key: SecretStr | None = None
+    anthropic_api_key: SecretStr | None = None
+
+    # Models (small, cheap models for development)
+    openai_model: str = "gpt-5-nano"
+    anthropic_model: str = "claude-haiku-5-5"
+
+    # Safety limits for LLM calls
+    llm_timeout_seconds: float = 30.0
+    llm_max_output_tokens: int = 500
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Create the Settings object once and reuse it everywhere."""
+    return Settings()
