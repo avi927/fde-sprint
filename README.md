@@ -63,11 +63,11 @@ Then open http://127.0.0.1:8000/docs for Swagger.
 
 | Code | When |
 |---|---|
-| 422 | ? |
-| 429 | ? |
-| 502 | ? |
-| 503 | ? |
-| 504 | ? |
+| 422 | bad Input |
+| 429 | provider rate-limiting us  |
+| 502 |  any other provider problem  |
+| 503 | provider not configured |
+| 504 | provider too slow |
 
 ## Known limitations
 
