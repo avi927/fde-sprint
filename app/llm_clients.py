@@ -27,7 +27,7 @@ class LLMResult:
     latency_ms: float
 
 
-def call_openai(prompt: str) -> LLMResult:
+def call_openai(prompt: str, system_prompt: str = SYSTEM_PROMPT) -> LLMResult:
     """Call OpenAI, or any OpenAI-compatible provider such as Groq."""
     settings = get_settings()
     if settings.openai_api_key is None:
@@ -44,7 +44,7 @@ def call_openai(prompt: str) -> LLMResult:
     response = client.chat.completions.create(
         model=settings.openai_model,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
         max_completion_tokens=settings.llm_max_output_tokens,
@@ -63,7 +63,7 @@ def call_openai(prompt: str) -> LLMResult:
     return result
 
 
-def call_anthropic(prompt: str) -> LLMResult:
+def call_anthropic(prompt: str, system_prompt: str = SYSTEM_PROMPT) -> LLMResult:
     """Call Anthropic's Claude with one user prompt."""
     settings = get_settings()
     if settings.anthropic_api_key is None:
@@ -79,7 +79,7 @@ def call_anthropic(prompt: str) -> LLMResult:
     response = client.messages.create(
         model=settings.anthropic_model,
         max_tokens=settings.llm_max_output_tokens,
-        system=SYSTEM_PROMPT,
+        system=system_prompt,
         messages=[{"role": "user", "content": prompt}],
     )
     latency_ms = (time.perf_counter() - start) * 1000
