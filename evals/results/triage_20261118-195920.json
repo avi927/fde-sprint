@@ -1,0 +1,58 @@
+[
+  {
+    "version": "v3",
+    "cases": 12,
+    "perfect": 10,
+    "field_accuracy": {
+      "category": 1.0,
+      "priority": 0.9166666666666666,
+      "sentiment": 1.0,
+      "needs_human": 0.9166666666666666
+    },
+    "failed": 0,
+    "avg_attempts": 1.0,
+    "total_input_tokens": 8496,
+    "avg_latency_ms": 1011.6333333333332,
+    "mistakes": [
+      {
+        "id": "paid-feature-partly-broken",
+        "field": "priority",
+        "expected": "high",
+        "actual": "medium"
+      },
+      {
+        "id": "paid-service-completely-down",
+        "field": "needs_human",
+        "expected": [
+          "true_or_false_placeholder"
+        ],
+        "actual": true
+      }
+    ]
+  },
+  {
+    "version": "v4",
+    "cases": 12,
+    "perfect": 11,
+    "field_accuracy": {
+      "category": 1.0,
+      "priority": 1.0,
+      "sentiment": 1.0,
+      "needs_human": 0.9166666666666666
+    },
+    "failed": 0,
+    "avg_attempts": 1.0,
+    "total_input_tokens": 8772,
+    "avg_latency_ms": 2817.5833333333326,
+    "mistakes": [
+      {
+        "id": "paid-service-completely-down",
+        "field": "needs_human",
+        "expected": [
+          "true_or_false_placeholder"
+        ],
+        "actual": true
+      }
+    ]
+  }
+]

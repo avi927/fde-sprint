@@ -53,8 +53,8 @@ class TriageRequest(BaseModel):
             "I was charged twice for order #4521 and nobody has answered my emails!"
         ],
     )
-    prompt_version: Literal["v1", "v2", "v3"] = Field(
-        default="v3",
+    prompt_version: Literal["v1", "v2", "v3", "v4"] = Field(
+        default="v4",
         description="Which triage prompt version to use.",
     )
 

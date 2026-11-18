@@ -1,0 +1,47 @@
+[
+  {
+    "version": "v3",
+    "cases": 12,
+    "perfect": 10,
+    "field_accuracy": {
+      "category": 1.0,
+      "priority": 0.8333333333333334,
+      "sentiment": 1.0,
+      "needs_human": 1.0
+    },
+    "failed": 0,
+    "avg_attempts": 1.0,
+    "total_input_tokens": 8496,
+    "avg_latency_ms": 899.3000000000001,
+    "mistakes": [
+      {
+        "id": "premium-logout",
+        "field": "priority",
+        "expected": "high",
+        "actual": "medium"
+      },
+      {
+        "id": "paid-feature-partly-broken",
+        "field": "priority",
+        "expected": "high",
+        "actual": "medium"
+      }
+    ]
+  },
+  {
+    "version": "v4",
+    "cases": 12,
+    "perfect": 12,
+    "field_accuracy": {
+      "category": 1.0,
+      "priority": 1.0,
+      "sentiment": 1.0,
+      "needs_human": 1.0
+    },
+    "failed": 0,
+    "avg_attempts": 1.0,
+    "total_input_tokens": 8772,
+    "avg_latency_ms": 1560.2250000000001,
+    "mistakes": []
+  }
+]

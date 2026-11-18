@@ -108,5 +108,27 @@
       "needs_human": true
     },
     "note": "Legal threat = urgent + needs_human."
+  },
+    {
+    "id": "paid-feature-partly-broken",
+    "ticket": "Video calls on my business plan keep dropping every few minutes. We can still work, but it is really frustrating.",
+    "expected": {
+      "category": "technical",
+      "priority": "high",
+      "sentiment": ["negative", "angry"],
+      "needs_human": false
+    },
+    "note": "Boundary case: paid feature, partly broken, still usable = high. Frustrated but not angry, no money issue, so no human needed."
+  },
+  {
+    "id": "paid-service-completely-down",
+    "ticket": "I pay for premium and since yesterday the app will not open at all. I cannot use anything.",
+    "expected": {
+      "category": "technical",
+      "priority": "urgent",
+      "sentiment": ["negative", "angry"],
+      "needs_human": [true, false]
+    },
+    "note": "Boundary case: paid service completely unusable = urgent. needs_human is ambiguous under current rules (not money/security, tone negative or angry). Open question for the customer: should a fully blocked paying customer always reach a human?"
   }
 ]
