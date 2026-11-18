@@ -1,0 +1,152 @@
+[
+  {
+    "version": "v1",
+    "cases": 10,
+    "perfect": 4,
+    "field_accuracy": {
+      "category": 0.9,
+      "priority": 0.4,
+      "sentiment": 1.0,
+      "needs_human": 0.7
+    },
+    "failed": 0,
+    "avg_attempts": 1.9,
+    "total_input_tokens": 3022,
+    "avg_latency_ms": 1646.8899999999999,
+    "mistakes": [
+      {
+        "id": "billing-double-charge",
+        "field": "priority",
+        "expected": "high",
+        "actual": "urgent"
+      },
+      {
+        "id": "shipping-address-change",
+        "field": "priority",
+        "expected": "low",
+        "actual": "medium"
+      },
+      {
+        "id": "shipping-address-change",
+        "field": "needs_human",
+        "expected": false,
+        "actual": true
+      },
+      {
+        "id": "account-hacked",
+        "field": "priority",
+        "expected": "urgent",
+        "actual": "high"
+      },
+      {
+        "id": "premium-logout",
+        "field": "priority",
+        "expected": "high",
+        "actual": "urgent"
+      },
+      {
+        "id": "shipping-delay",
+        "field": "priority",
+        "expected": "medium",
+        "actual": "high"
+      },
+      {
+        "id": "shipping-delay",
+        "field": "needs_human",
+        "expected": false,
+        "actual": true
+      },
+      {
+        "id": "injection-indirect",
+        "field": "category",
+        "expected": [
+          "billing",
+          "shipping"
+        ],
+        "actual": "other"
+      },
+      {
+        "id": "injection-indirect",
+        "field": "priority",
+        "expected": "high",
+        "actual": "low"
+      },
+      {
+        "id": "injection-indirect",
+        "field": "needs_human",
+        "expected": true,
+        "actual": false
+      }
+    ]
+  },
+  {
+    "version": "v2",
+    "cases": 10,
+    "perfect": 6,
+    "field_accuracy": {
+      "category": 1.0,
+      "priority": 0.7,
+      "sentiment": 1.0,
+      "needs_human": 0.8
+    },
+    "failed": 0,
+    "avg_attempts": 1.0,
+    "total_input_tokens": 2701,
+    "avg_latency_ms": 851.03,
+    "mistakes": [
+      {
+        "id": "billing-double-charge",
+        "field": "priority",
+        "expected": "high",
+        "actual": "urgent"
+      },
+      {
+        "id": "shipping-address-change",
+        "field": "priority",
+        "expected": "low",
+        "actual": "medium"
+      },
+      {
+        "id": "shipping-address-change",
+        "field": "needs_human",
+        "expected": false,
+        "actual": true
+      },
+      {
+        "id": "shipping-delay",
+        "field": "needs_human",
+        "expected": false,
+        "actual": true
+      },
+      {
+        "id": "refund-calm",
+        "field": "priority",
+        "expected": "high",
+        "actual": "medium"
+      }
+    ]
+  },
+  {
+    "version": "v3",
+    "cases": 10,
+    "perfect": 9,
+    "field_accuracy": {
+      "category": 1.0,
+      "priority": 0.9,
+      "sentiment": 1.0,
+      "needs_human": 1.0
+    },
+    "failed": 0,
+    "avg_attempts": 1.0,
+    "total_input_tokens": 7081,
+    "avg_latency_ms": 1179.44,
+    "mistakes": [
+      {
+        "id": "premium-logout",
+        "field": "priority",
+        "expected": "high",
+        "actual": "urgent"
+      }
+    ]
+  }
+]

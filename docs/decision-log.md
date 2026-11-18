@@ -18,3 +18,12 @@ DAY 2:-
 -Decision: store prompts as versioned .md files in prompts/, loaded by app/prompts.py.
 -Why: you can compare versions, roll back, review in pull requests, and non-developers can edit them.
 -Rejected: prompts as strings inside Python code.
+
+1-> Validate model output with Pydantic and retry with error feedback (max 3 attempts). 
+Why: LLM output is untrusted and may break format even with good prompts; Pydantic’s error messages make good feedback. Rejected: trusting the output; unlimited retries (cost risk).
+
+2-> Our own validation instead of relying only on provider JSON modes. 
+Why: works with any provider, and acts as a safety net even when JSON mode is used. Revisit: add provider JSON mode as an extra layer if format failures are frequent.
+
+3-> Central exception handlers instead of try/except in each endpoint. 
+Why: DRY; consistent errors across all endpoints. Rejected: copying the except chain into /triage.
