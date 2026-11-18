@@ -10,9 +10,9 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.llm_clients import ProviderNotConfiguredError, call_anthropic, call_openai
 from app.logging_config import setup_logging
-from app.prompts import PromptNotFoundError
 from app.schemas import ChatRequest, ChatResponse, TriageRequest, TriageResponse
 from app.triage import TriageFailedError, triage_ticket
+from app.prompts import PromptNotFoundError, load_prompt
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -138,7 +138,7 @@ def health() -> dict[str, str | bool]:
 def chat(request: ChatRequest) -> ChatResponse:
     """Send one message to the chosen LLM provider and return its reply."""
     call_llm = PROVIDERS[request.provider]
-    result = call_llm(request.message)
+    result = call_llm(request.message, system_prompt=load_prompt("chat", "v1"))
     return ChatResponse(
         provider=result.provider,
         model=result.model,
