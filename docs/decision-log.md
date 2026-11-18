@@ -13,3 +13,8 @@ BUT:-
 -> Groq for development (instead of paid OpenAI or Anthropic).
 -> The provider name in the API stays "openai" (instead of "groq" or "openai_compatible"). Explain why you kept it, and what the trade-off is.
 -> Error mapping: provider errors become 429/502/503/504 instead of passing the provider’s raw error to the client
+
+DAY 2:-
+-Decision: store prompts as versioned .md files in prompts/, loaded by app/prompts.py.
+-Why: you can compare versions, roll back, review in pull requests, and non-developers can edit them.
+-Rejected: prompts as strings inside Python code.
