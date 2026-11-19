@@ -26,19 +26,23 @@ class LLMResult:
     output_tokens: int
     latency_ms: float
 
-
-def call_openai(prompt: str, system_prompt: str = SYSTEM_PROMPT) -> LLMResult:
-    """Call OpenAI, or any OpenAI-compatible provider such as Groq."""
+def get_openai_client() -> OpenAI:
+    """Create an OpenAI SDK client from settings (works for OpenAI-compatible providers too)."""
     settings = get_settings()
     if settings.openai_api_key is None:
-        raise ValueError("OPENAI_API_KEY is not set in .env")
-
-    client = OpenAI(
+        raise ProviderNotConfiguredError("OPENAI_API_KEY is not set in .env")
+    return OpenAI(
         api_key=settings.openai_api_key.get_secret_value(),
         base_url=settings.openai_base_url,
         timeout=settings.llm_timeout_seconds,
         max_retries=2,
     )
+
+
+def call_openai(prompt: str, system_prompt: str = SYSTEM_PROMPT) -> LLMResult:
+    """Call OpenAI, or any OpenAI-compatible provider such as Groq."""
+    settings = get_settings()
+    client = get_openai_client()
 
     start = time.perf_counter()
     response = client.chat.completions.create(

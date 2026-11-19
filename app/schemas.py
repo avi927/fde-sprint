@@ -69,3 +69,24 @@ class TriageResponse(BaseModel):
     input_tokens: int 
     output_tokens: int
     latency_ms: float    
+
+
+class AssistantRequest(BaseModel):
+    """What the client sends to /assistant."""
+
+    question: str = Field(
+        min_length=1,
+        max_length=2000,
+        description="The customer's question.",
+        examples=["What's the status of my order #4521?"],
+    )
+
+
+class AssistantResponse(BaseModel):
+    """What /assistant sends back."""
+
+    reply: str
+    tools_used: list[str]
+    steps: int
+    input_tokens: int
+    output_tokens: int

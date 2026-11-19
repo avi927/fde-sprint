@@ -10,7 +10,16 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.llm_clients import ProviderNotConfiguredError, call_anthropic, call_openai
 from app.logging_config import setup_logging
-from app.schemas import ChatRequest, ChatResponse, TriageRequest, TriageResponse
+from app.schemas import (
+    AssistantRequest,
+    AssistantResponse,
+    ChatRequest,
+    ChatResponse,
+    TriageRequest,
+    TriageResponse,
+)
+
+from app.assistant import AssistantLoopError, ask_assistant
 from app.triage import TriageFailedError, triage_ticket
 from app.prompts import PromptNotFoundError, load_prompt
 
@@ -65,6 +74,15 @@ def _error_response(
         },
     )
     return JSONResponse(status_code=status_code, content={"detail": message})
+
+
+@app.exception_handler(AssistantLoopError)
+def handle_assistant_loop(request: Request, error: Exception) -> JSONResponse:
+    return _error_response(
+        request, 502, "assistant_loop_error",
+        "The assistant could not finish answering. Please try again.", error,
+        level=logging.ERROR,
+    )
 
 
 @app.exception_handler(ProviderNotConfiguredError)
@@ -148,6 +166,17 @@ def chat(request: ChatRequest) -> ChatResponse:
         latency_ms=result.latency_ms,
     )
 
+@app.post("/assistant")
+def assistant(request: AssistantRequest) -> AssistantResponse:
+    """Answer a customer question, looking up order data with tools when needed."""
+    outcome = ask_assistant(request.question)
+    return AssistantResponse(
+        reply=outcome.reply,
+        tools_used=outcome.tools_used,
+        steps=outcome.steps,
+        input_tokens=outcome.input_tokens,
+        output_tokens=outcome.output_tokens,
+    )
 
 @app.post("/triage")
 def triage(request: TriageRequest) -> TriageResponse:
