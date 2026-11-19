@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 30.0
     llm_max_output_tokens: int = 1000
 
+    # Database
+    database_url: SecretStr | None = None
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -1,0 +1,142 @@
+[
+  {
+    "slug": "refund-policy",
+    "title": "Refund policy",
+    "category": "billing",
+    "updated_at": "2026-10-01",
+    "content": "You can request a refund within 14 days of delivery. Items must be unused and in their original packaging. Refunds are paid to the original payment method within 5 business days after we receive the return. Shipping costs are not refunded unless the item arrived damaged or was the wrong item."
+  },
+  {
+    "slug": "refund-sale-items",
+    "title": "Refunds for sale and clearance items",
+    "category": "billing",
+    "updated_at": "2026-10-01",
+    "content": "Items bought at 50% off or more are final sale and cannot be refunded, but they can be exchanged for store credit within 14 days. Faulty sale items are always refunded."
+  },
+  {
+    "slug": "double-charge",
+    "title": "I was charged twice",
+    "category": "billing",
+    "updated_at": "2026-09-15",
+    "content": "A duplicate charge is usually a temporary authorization hold that disappears within 3 business days. If both charges are still there after 3 business days, contact support with your order number and we will refund the duplicate."
+  },
+  {
+    "slug": "payment-methods",
+    "title": "Accepted payment methods",
+    "category": "billing",
+    "updated_at": "2026-08-20",
+    "content": "We accept Visa, Mastercard, American Express, PayPal and Apple Pay. We do not accept cash on delivery or bank transfers."
+  },
+  {
+    "slug": "error-e4012",
+    "title": "Error E-4012 at checkout",
+    "category": "billing",
+    "updated_at": "2026-09-30",
+    "content": "Error E-4012 means your card issuer declined the payment. Check that the billing address matches your card, or try another card. We cannot see the reason for the decline; only your bank can tell you."
+  },
+  {
+    "slug": "delivery-times",
+    "title": "Delivery times",
+    "category": "shipping",
+    "updated_at": "2026-10-10",
+    "content": "Standard delivery takes 3 to 5 business days. Express delivery takes 1 to 2 business days and costs $9.99. Orders placed after 2 pm ship the next business day."
+  },
+  {
+    "slug": "international-shipping",
+    "title": "International shipping",
+    "category": "shipping",
+    "updated_at": "2026-10-10",
+    "content": "We ship to the United States, Canada, the United Kingdom and the European Union. International delivery takes 7 to 12 business days. Customs fees are paid by the customer."
+  },
+  {
+    "slug": "change-delivery-address",
+    "title": "Changing your delivery address",
+    "category": "shipping",
+    "updated_at": "2026-09-01",
+    "content": "You can change the delivery address until your order ships. Go to Orders, select the order and choose Edit address. Once the order has shipped, contact the carrier directly to redirect it."
+  },
+  {
+    "slug": "package-not-arrived",
+    "title": "My package hasn't arrived",
+    "category": "shipping",
+    "updated_at": "2026-10-05",
+    "content": "If tracking has not updated for 5 business days, or the package shows as delivered but you cannot find it, contact support. We will open an investigation with the carrier and send a replacement or a refund within 7 days."
+  },
+  {
+    "slug": "damaged-item",
+    "title": "Item arrived damaged",
+    "category": "shipping",
+    "updated_at": "2026-10-05",
+    "content": "If your item arrived damaged, send us a photo within 48 hours of delivery. We will send a free replacement or a full refund, including shipping costs."
+  },
+  {
+    "slug": "reset-password",
+    "title": "Resetting your password",
+    "category": "account",
+    "updated_at": "2026-07-12",
+    "content": "Click Forgot password on the sign-in page and enter your email address. The reset link is valid for 30 minutes. If you don't receive the email, check your spam folder."
+  },
+  {
+    "slug": "suspicious-activity",
+    "title": "Suspicious activity on my account",
+    "category": "account",
+    "updated_at": "2026-10-12",
+    "content": "If you see orders or account changes you didn't make, reset your password immediately and contact support. We will lock the account, cancel unauthorized orders and review recent activity within 24 hours."
+  },
+  {
+    "slug": "two-factor-authentication",
+    "title": "Turning on two-factor authentication",
+    "category": "account",
+    "updated_at": "2026-07-12",
+    "content": "Go to Settings, then Security, and enable two-factor authentication. You can use an authenticator app or SMS codes. We strongly recommend an authenticator app."
+  },
+  {
+    "slug": "delete-account-data",
+    "title": "Deleting your account and personal data",
+    "category": "account",
+    "updated_at": "2026-08-01",
+    "content": "You can request deletion of your account and personal data under GDPR from Settings, then Privacy, then Delete my data. We complete the deletion within 30 days and email you a confirmation."
+  },
+  {
+    "slug": "change-email",
+    "title": "Changing your email address",
+    "category": "account",
+    "updated_at": "2026-07-12",
+    "content": "Go to Settings, then Profile, to change your email address. We send a confirmation link to the new address, and the change takes effect after you click it."
+  },
+  {
+    "slug": "app-keeps-logging-out",
+    "title": "The app keeps logging me out",
+    "category": "technical",
+    "updated_at": "2026-10-15",
+    "content": "Frequent logouts are usually caused by an outdated app version or battery-saver settings. Update the app to the latest version and allow it to run in the background. If it continues, reinstall the app."
+  },
+  {
+    "slug": "app-crash-cart",
+    "title": "The app crashes when opening the cart",
+    "category": "technical",
+    "updated_at": "2026-10-15",
+    "content": "This is a known issue in app version 4.2 on some Android devices. Update to version 4.3, or use the website until you can update."
+  },
+  {
+    "slug": "dark-mode",
+    "title": "Is there a dark mode?",
+    "category": "technical",
+    "updated_at": "2026-06-30",
+    "content": "Dark mode is not available yet. It is on our product roadmap for next year."
+  },
+  {
+    "slug": "premium-membership",
+    "title": "Premium membership benefits",
+    "category": "other",
+    "updated_at": "2026-09-20",
+    "content": "Premium costs $7.99 per month and includes free express delivery, early access to sales and priority support. You can cancel anytime from Settings, then Membership; the benefits last until the end of the billing period."
+  },
+  {
+    "slug": "contact-support",
+    "title": "How to contact support",
+    "category": "other",
+    "updated_at": "2026-08-20",
+    "content": "You can reach support by chat in the app or by email at support@example-store.com, Monday to Friday, 9 am to 6 pm. Premium members get priority replies."
+  }
+]
