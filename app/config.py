@@ -1,10 +1,13 @@
 """Application settings, loaded from environment variables and the .env file."""
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
@@ -37,6 +40,14 @@ class Settings(BaseSettings):
 
     # Database
     database_url: SecretStr | None = None
+
+    # Embeddings
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_dimensions: int = 384
+    embedding_query_prefix: str = (
+        "Represent this sentence for searching relevant passages: "
+    )
+    embedding_cache_dir: Path = PROJECT_ROOT / ".cache" / "fastembed"
 
 
 @lru_cache

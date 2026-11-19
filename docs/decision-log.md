@@ -151,3 +151,10 @@ Entries with numbers link to the evidence (eval result files in `evals/results/`
 - **Open question for the customer:** Should a paying customer who cannot use the product
   at all always reach a human?
 - **Revisit when:** The customer answers → add an explicit rule (v5) and tighten the case.
+
+DAY 3:- 
+1-“Database schema managed with numbered SQL migrations and a small runner (scripts/migrate.py, tracking table schema_migrations, one transaction per migration). Why: reproducible on any fresh database (teammates, AWS, tests), history in Git, idempotent. Rule: never edit an applied migration; add a new one. Rejected: manual SQL in psql (not reproducible). Production alternative: Alembic.”
+
+2-“documents table: vector(384) (matches bge-small), JSONB metadata for flexible attributes, unique slug for idempotent ingestion, timestamptz timestamps. Why JSONB: customers’ metadata varies; no schema change needed. Trade-off: less strict than real columns.”
+
+3-“HNSW index with vector_cosine_ops (matches the <=> cosine operator) + GIN index on metadata. Why: approximate nearest-neighbour search and fast JSONB filters at scale. Note: the operator class must match the query operator or the index is silently ignored.”
