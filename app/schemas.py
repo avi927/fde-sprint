@@ -100,3 +100,40 @@ class StreamChatRequest(BaseModel):
         description="The user's question or instruction.",
         examples=["Explain what a Forward Deployed Engineer does in 3 short paragraphs."],
     )
+
+
+class SearchRequest(BaseModel):
+    """What the client sends to /search."""
+
+    query: str = Field(
+        min_length=1,
+        max_length=500,
+        description="The question or search text.",
+        examples=["How do I get my money back?"],
+    )
+    top_k: int = Field(default=5, ge=1, le=20, description="How many results to return.")
+    category: Literal["billing", "shipping", "technical", "account", "other"] | None = Field(
+        default=None,
+        description="Only search documents in this category (optional).",
+    )
+
+
+class SearchHit(BaseModel):
+    """One search result."""
+
+    slug: str
+    title: str
+    content: str
+    category: str
+    similarity: float
+
+
+class SearchResponse(BaseModel):
+    """What /search sends back."""
+
+    query: str
+    top_k: int
+    category: str | None
+    results: list[SearchHit]
+    embedding_ms: float
+    db_ms: float

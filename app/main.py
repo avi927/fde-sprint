@@ -2,12 +2,13 @@
 
 import logging
 import time
+from contextlib import asynccontextmanager
 
 import anthropic
 import openai
+import psycopg
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
-
 from app.assistant import AssistantLoopError, ask_assistant
 from app.config import get_settings
 from app.llm_clients import (
@@ -23,21 +24,36 @@ from app.schemas import (
     AssistantResponse,
     ChatRequest,
     ChatResponse,
+    SearchHit,
+    SearchRequest,
+    SearchResponse,
     StreamChatRequest,
     TriageRequest,
     TriageResponse,
 )
 from app.streaming import sse_events
 from app.triage import TriageFailedError, triage_ticket
+from app.db import DatabaseNotConfiguredError
+from app.embeddings import warm_up
+from app.search import search_documents
 
 settings = get_settings()
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Runs once at startup (before `yield`) and once at shutdown (after `yield`)."""
+    warm_up()
+    logger.info("embedding_model_ready")
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
-    version="0.2.0",
-    description="Day 2: LLM backend with structured outputs",
+    version="0.4.0",
+    description="Day 3: semantic search over the knowledge base",
+    lifespan=lifespan,
 )
 
 PROVIDERS = {
@@ -143,6 +159,22 @@ def handle_prompt_not_found(request: Request, error: Exception) -> JSONResponse:
         "Server configuration error.", error, level=logging.ERROR,
     )
 
+@app.exception_handler(DatabaseNotConfiguredError)
+def handle_db_not_configured(request: Request, error: Exception) -> JSONResponse:
+    return _error_response(
+        request, 503, "database_not_configured",
+        "Search is not configured on this server.", error, level=logging.ERROR,
+    )
+
+
+@app.exception_handler(psycopg.OperationalError)
+def handle_db_unavailable(request: Request, error: Exception) -> JSONResponse:
+    return _error_response(
+        request, 503, "database_unavailable",
+        "Search is temporarily unavailable. Please try again.", error,
+        level=logging.ERROR,
+    )
+
 
 # ---------- Endpoints ----------
 
@@ -215,4 +247,26 @@ def triage(request: TriageRequest) -> TriageResponse:
         input_tokens=outcome.input_tokens,
         output_tokens=outcome.output_tokens,
         latency_ms=outcome.latency_ms,
+    )
+
+@app.post("/search")
+def search(request: SearchRequest) -> SearchResponse:
+    """Semantic search: return the knowledge base articles most similar to the query."""
+    outcome = search_documents(request.query, request.top_k, request.category)
+    return SearchResponse(
+        query=request.query,
+        top_k=request.top_k,
+        category=request.category,
+        results=[
+            SearchHit(
+                slug=hit.slug,
+                title=hit.title,
+                content=hit.content,
+                category=hit.category,
+                similarity=hit.similarity,
+            )
+            for hit in outcome.hits
+        ],
+        embedding_ms=outcome.embedding_ms,
+        db_ms=outcome.db_ms,
     )
