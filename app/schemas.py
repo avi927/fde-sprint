@@ -1,7 +1,7 @@
 """Request and response shapes for the API, validated by Pydantic."""
 
 from typing import Literal
-
+from app.streaming import sse_events
 from pydantic import BaseModel, Field
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -90,3 +90,13 @@ class AssistantResponse(BaseModel):
     steps: int
     input_tokens: int
     output_tokens: int
+
+class StreamChatRequest(BaseModel):
+    """What the client sends to /chat/stream."""
+
+    message: str = Field(
+        min_length=1,
+        max_length=4000,
+        description="The user's question or instruction.",
+        examples=["Explain what a Forward Deployed Engineer does in 3 short paragraphs."],
+    )

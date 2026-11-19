@@ -1,27 +1,34 @@
 """Entry point of the API: creates the FastAPI app, its error handlers and endpoints."""
 
 import logging
+import time
 
 import anthropic
 import openai
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
+from app.assistant import AssistantLoopError, ask_assistant
 from app.config import get_settings
-from app.llm_clients import ProviderNotConfiguredError, call_anthropic, call_openai
+from app.llm_clients import (
+    ProviderNotConfiguredError,
+    call_anthropic,
+    call_openai,
+    start_openai_stream,
+)
 from app.logging_config import setup_logging
+from app.prompts import PromptNotFoundError, load_prompt
 from app.schemas import (
     AssistantRequest,
     AssistantResponse,
     ChatRequest,
     ChatResponse,
+    StreamChatRequest,
     TriageRequest,
     TriageResponse,
 )
-
-from app.assistant import AssistantLoopError, ask_assistant
+from app.streaming import sse_events
 from app.triage import TriageFailedError, triage_ticket
-from app.prompts import PromptNotFoundError, load_prompt
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -164,6 +171,24 @@ def chat(request: ChatRequest) -> ChatResponse:
         input_tokens=result.input_tokens,
         output_tokens=result.output_tokens,
         latency_ms=result.latency_ms,
+    )
+
+
+@app.post("/chat/stream")
+def chat_stream(request: StreamChatRequest) -> StreamingResponse:
+    """Stream the reply as Server-Sent Events: one event per text chunk, then 'done'.
+
+    Note: Swagger UI shows the whole response only at the end. Use curl or
+    scripts/stream_client.py to see the chunks arrive live.
+    """
+    started_at = time.perf_counter()
+    stream = start_openai_stream(
+        request.message, system_prompt=load_prompt("chat", "v1")
+    )
+    return StreamingResponse(
+        sse_events(stream, settings.openai_model, started_at),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 @app.post("/assistant")

@@ -3,6 +3,8 @@
 import logging
 import time
 from dataclasses import dataclass
+from openai import OpenAI, Stream
+from openai.types.chat import ChatCompletionChunk
 
 from anthropic import Anthropic
 from openai import OpenAI
@@ -65,6 +67,26 @@ def call_openai(prompt: str, system_prompt: str = SYSTEM_PROMPT) -> LLMResult:
     )
     _log_result(result)
     return result
+
+def start_openai_stream(
+    prompt: str, system_prompt: str = SYSTEM_PROMPT
+) -> Stream[ChatCompletionChunk]:
+    """Open a streaming chat completion.
+
+    The request is sent here, so connection, auth and rate-limit errors are raised
+    now, before our own response starts. The text chunks are read later.
+    """
+    settings = get_settings()
+    client = get_openai_client()
+    return client.chat.completions.create(
+        model=settings.openai_model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+        max_completion_tokens=settings.llm_max_output_tokens,
+        stream=True,
+    )
 
 
 def call_anthropic(prompt: str, system_prompt: str = SYSTEM_PROMPT) -> LLMResult:
