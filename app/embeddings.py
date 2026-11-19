@@ -50,3 +50,7 @@ def embed_query(text: str) -> np.ndarray:
     settings = get_settings()
     vectors = _get_model().embed([settings.embedding_query_prefix + text])
     return _check_dimensions(next(iter(vectors)))
+
+def warm_up() -> None:
+    """Load the model now, so the first real request doesn't pay the loading time."""
+    _get_model()
