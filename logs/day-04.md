@@ -54,5 +54,3 @@ and prove it with an eval.
 - Harder RAG eval cases (break the ceiling effect)
 - Backlog: connection pool, content-hash re-embedding skip, LLM-as-judge grounding
 
-## Commits
-- ?  (paste: git log --oneline --since="2026-11-20")
