@@ -116,6 +116,7 @@ class SearchRequest(BaseModel):
         default=None,
         description="Only search documents in this category (optional).",
     )
+<<<<<<< HEAD
     mode: Literal["semantic", "keyword"] = Field(
         default="semantic",
         description="semantic = by meaning (embeddings); keyword = by words (full-text).",
@@ -124,12 +125,22 @@ class SearchRequest(BaseModel):
 
 class SearchHit(BaseModel):
     """One search result. Scores are only comparable within the same mode."""
+=======
+
+
+class SearchHit(BaseModel):
+    """One search result."""
+>>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
 
     slug: str
     title: str
     content: str
     category: str
+<<<<<<< HEAD
     score: float
+=======
+    similarity: float
+>>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
 
 
 class SearchResponse(BaseModel):
@@ -138,7 +149,10 @@ class SearchResponse(BaseModel):
     query: str
     top_k: int
     category: str | None
+<<<<<<< HEAD
     mode: str
+=======
+>>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
     results: list[SearchHit]
     embedding_ms: float
     db_ms: float

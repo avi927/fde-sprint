@@ -251,22 +251,34 @@ def triage(request: TriageRequest) -> TriageResponse:
 
 @app.post("/search")
 def search(request: SearchRequest) -> SearchResponse:
+<<<<<<< HEAD
     """Search the knowledge base by meaning (semantic) or by words (keyword)."""
     outcome = search_documents(
         request.query, request.top_k, request.category, mode=request.mode
     )
+=======
+    """Semantic search: return the knowledge base articles most similar to the query."""
+    outcome = search_documents(request.query, request.top_k, request.category)
+>>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
     return SearchResponse(
         query=request.query,
         top_k=request.top_k,
         category=request.category,
+<<<<<<< HEAD
         mode=request.mode,
+=======
+>>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
         results=[
             SearchHit(
                 slug=hit.slug,
                 title=hit.title,
                 content=hit.content,
                 category=hit.category,
+<<<<<<< HEAD
                 score=hit.score,
+=======
+                similarity=hit.similarity,
+>>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
             )
             for hit in outcome.hits
         ],
