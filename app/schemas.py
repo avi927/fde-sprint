@@ -158,3 +158,37 @@ class SearchResponse(BaseModel):
     db_ms: float
     reranked: bool
     rerank_ms: float
+
+class AskRequest(BaseModel):
+    """What the client sends to /ask."""
+
+    question: str = Field(
+        min_length=1,
+        max_length=1000,
+        description="The customer's question.",
+        examples=["Can I return opened headphones?"],
+    )
+
+
+class AskSource(BaseModel):
+    """One help-centre excerpt that was given to the model."""
+
+    source_id: str
+    title: str
+    score: float
+    content: str
+
+
+class AskResponse(BaseModel):
+    """What /ask sends back."""
+
+    question: str
+    answer: str
+    answerable: bool
+    citations: list[str]
+    sources: list[AskSource]
+    attempts: int
+    retrieval_ms: float
+    llm_ms: float
+    input_tokens: int
+    output_tokens: int    

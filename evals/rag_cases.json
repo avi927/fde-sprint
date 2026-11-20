@@ -1,0 +1,82 @@
+[
+  {
+    "id": "return-window",
+    "question": "How many days do I have to return an item?",
+    "answerable": true,
+    "expected_sources": ["refund-policy", "returns-guide"],
+    "must_include": ["14"],
+    "note": "Core fact. Day 2's /chat invented 30 days."
+  },
+  {
+    "id": "opened-electronics",
+    "question": "Can I return opened headphones?",
+    "answerable": true,
+    "expected_sources": ["returns-guide"],
+    "must_include": ["31 January|January 31|Jan 31|31st January"],
+    "note": "Specific fact deep inside the long returns guide."
+  },
+  {
+    "id": "holiday-deadline",
+    "question": "I bought a present on 20 December. Until when can it be returned?",
+    "answerable": true,
+    "expected_sources": ["returns-guide"],
+    "must_include": ["31 January"],
+    "note": "Requires the holiday-extension rule."
+  },
+  {
+    "id": "saturday-delivery",
+    "question": "How much extra does Saturday delivery cost?",
+    "answerable": true,
+    "expected_sources": ["shipping-guide"],
+    "must_include": ["$6"],
+    "note": "Only in the long shipping guide (UK only)."
+  },
+  {
+    "id": "account-lockout",
+    "question": "How long is my account locked after too many wrong passwords?",
+    "answerable": true,
+    "expected_sources": ["account-security-guide"],
+    "must_include": ["15 minutes"],
+    "note": "Distractor: the reset-password article."
+  },
+  {
+    "id": "backup-codes",
+    "question": "How many backup codes do I get for two-factor authentication?",
+    "answerable": true,
+    "expected_sources": ["account-security-guide"],
+    "must_include": ["10"],
+    "note": "Distractor: the short two-factor article doesn't mention backup codes."
+  },
+  {
+    "id": "paypal-refund-speed",
+    "question": "How quickly do PayPal refunds show up?",
+    "answerable": true,
+    "expected_sources": ["returns-guide"],
+    "must_include": ["24 hours"],
+    "note": "One sentence at the end of a paragraph about refund timing."
+  },
+  {
+    "id": "no-answer-ceo",
+    "question": "What is the name of your CEO?",
+    "answerable": false,
+    "expected_sources": [],
+    "must_include": [],
+    "note": "Not in the knowledge base. Must say I don't know."
+  },
+  {
+    "id": "no-answer-store",
+    "question": "Do you have a physical store in London?",
+    "answerable": false,
+    "expected_sources": [],
+    "must_include": [],
+    "note": "Not in the knowledge base. London appears nowhere."
+  },
+  {
+    "id": "no-answer-price-match",
+    "question": "Do you match prices if a competitor sells the same item cheaper?",
+    "answerable": false,
+    "expected_sources": [],
+    "must_include": [],
+    "note": "Tempting: sounds like a normal store policy, but it isn't documented. Must not invent one."
+  }
+]

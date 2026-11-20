@@ -56,6 +56,12 @@ class Settings(BaseSettings):
     rerank_candidates: int = 20
     rrf_k: int = 60
 
+    # RAG
+    rag_top_k: int = 5
+    rag_search_mode: Literal["semantic", "keyword", "hybrid"] = "hybrid"
+    rag_rerank: bool = True
+    rag_max_context_words: int = 700
+
 
 @lru_cache
 def get_settings() -> Settings:

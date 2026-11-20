@@ -20,6 +20,9 @@ from app.llm_clients import (
 from app.logging_config import setup_logging
 from app.prompts import PromptNotFoundError, load_prompt
 from app.schemas import (
+    AskRequest,
+    AskResponse,
+    AskSource,
     AssistantRequest,
     AssistantResponse,
     ChatRequest,
@@ -37,6 +40,7 @@ from app.db import DatabaseNotConfiguredError
 from app.embeddings import warm_up
 from app.search import search_chunks
 from app.reranking import warm_up_reranker
+from app.rag import RagFailedError, answer_question
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -109,6 +113,13 @@ def handle_assistant_loop(request: Request, error: Exception) -> JSONResponse:
         level=logging.ERROR,
     )
 
+@app.exception_handler(RagFailedError)
+def handle_rag_failed(request: Request, error: Exception) -> JSONResponse:
+    return _error_response(
+        request, 502, "rag_failed",
+        "The assistant could not produce a properly cited answer. Please try again.", error,
+        level=logging.ERROR,
+    )
 
 @app.exception_handler(ProviderNotConfiguredError)
 def handle_provider_not_configured(request: Request, error: Exception) -> JSONResponse:
@@ -285,4 +296,29 @@ def search(request: SearchRequest) -> SearchResponse:
         embedding_ms=outcome.embedding_ms,
         db_ms=outcome.db_ms,
         rerank_ms=outcome.rerank_ms,
+    )
+
+@app.post("/ask")
+def ask(request: AskRequest) -> AskResponse:
+    """Answer a question from the help centre only, with citations, or say I don't know."""
+    outcome = answer_question(request.question)
+    return AskResponse(
+        question=request.question,
+        answer=outcome.answer,
+        answerable=outcome.answerable,
+        citations=outcome.citations,
+        sources=[
+            AskSource(
+                source_id=hit.source_id,
+                title=hit.title,
+                score=hit.score,
+                content=hit.content,
+            )
+            for hit in outcome.sources
+        ],
+        attempts=outcome.attempts,
+        retrieval_ms=outcome.retrieval_ms,
+        llm_ms=outcome.llm_ms,
+        input_tokens=outcome.input_tokens,
+        output_tokens=outcome.output_tokens,
     )

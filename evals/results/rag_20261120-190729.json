@@ -1,0 +1,509 @@
+[
+  {
+    "config": "semantic_small",
+    "ok": 10,
+    "total": 10,
+    "retrieval_rate": 1.0,
+    "hallucinated": 0,
+    "false_idk": 0,
+    "avg_input_tokens": 808.0,
+    "avg_retrieval_ms": 106.45,
+    "avg_llm_ms": 785.02,
+    "rows": [
+      {
+        "id": "return-window",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "You have 14 days from delivery to return most items [returns-guide#0][refund-policy#0]. If you bought the item between 15\u202fNov and 31\u202fDec, you can return it until 31\u202fJan of the following year [returns-guide#2].",
+        "citations": [
+          "returns-guide#0",
+          "refund-policy#0",
+          "returns-guide#2"
+        ],
+        "attempts": 1,
+        "input_tokens": 829,
+        "retrieval_ms": 455.0,
+        "llm_ms": 1744.7
+      },
+      {
+        "id": "opened-electronics",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Yes, opened headphones (as electronics) can be returned, but the refund will be reduced by a 15% restocking fee unless the item is faulty [returns-guide#2][returns-guide#1].",
+        "citations": [
+          "returns-guide#2",
+          "returns-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 846,
+        "retrieval_ms": 63.3,
+        "llm_ms": 778.4
+      },
+      {
+        "id": "holiday-deadline",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "If you bought the present on 20 December, you can return it until 31 January of the following year [returns-guide#2].",
+        "citations": [
+          "returns-guide#2"
+        ],
+        "attempts": 1,
+        "input_tokens": 834,
+        "retrieval_ms": 52.6,
+        "llm_ms": 733.2
+      },
+      {
+        "id": "saturday-delivery",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Saturday delivery costs an extra $6 [shipping-guide#1].",
+        "citations": [
+          "shipping-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 791,
+        "retrieval_ms": 62.7,
+        "llm_ms": 873.9
+      },
+      {
+        "id": "account-lockout",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Your account is locked for 15 minutes after 5 failed sign\u2011in attempts [account-security-guide#0].",
+        "citations": [
+          "account-security-guide#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 768,
+        "retrieval_ms": 98.0,
+        "llm_ms": 697.6
+      },
+      {
+        "id": "backup-codes",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "You receive 10 backup codes for two-factor authentication [account-security-guide#1].",
+        "citations": [
+          "account-security-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 826,
+        "retrieval_ms": 82.4,
+        "llm_ms": 756.6
+      },
+      {
+        "id": "paypal-refund-speed",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "PayPal refunds usually appear within 24 hours [returns-guide#4].",
+        "citations": [
+          "returns-guide#4"
+        ],
+        "attempts": 1,
+        "input_tokens": 814,
+        "retrieval_ms": 67.9,
+        "llm_ms": 614.2
+      },
+      {
+        "id": "no-answer-ceo",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 741,
+        "retrieval_ms": 42.5,
+        "llm_ms": 412.1
+      },
+      {
+        "id": "no-answer-store",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 799,
+        "retrieval_ms": 71.7,
+        "llm_ms": 721.9
+      },
+      {
+        "id": "no-answer-price-match",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 832,
+        "retrieval_ms": 68.4,
+        "llm_ms": 517.6
+      }
+    ]
+  },
+  {
+    "config": "hybrid_rerank_small",
+    "ok": 9,
+    "total": 10,
+    "retrieval_rate": 1.0,
+    "hallucinated": 0,
+    "false_idk": 0,
+    "avg_input_tokens": 811.6,
+    "avg_retrieval_ms": 431.18999999999994,
+    "avg_llm_ms": 811.54,
+    "rows": [
+      {
+        "id": "return-window",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "You have 14 days from delivery to return an item for a refund or exchange [returns-guide#0] [refund-policy#0].",
+        "citations": [
+          "returns-guide#0",
+          "refund-policy#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 819,
+        "retrieval_ms": 643.7,
+        "llm_ms": 612.7
+      },
+      {
+        "id": "opened-electronics",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Yes, opened headphones (as electronics) can be returned, but you will be refunded minus a 15% restocking fee unless the item is faulty [returns-guide#1].",
+        "citations": [
+          "returns-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 846,
+        "retrieval_ms": 378.3,
+        "llm_ms": 866.2
+      },
+      {
+        "id": "holiday-deadline",
+        "diagnosis": "wrong_answer",
+        "fact_in_context": true,
+        "facts_in_answer": false,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Because you bought it on 20\u202fDecember, you can return it until 31\u202fJanuary of the following year, as the holiday extension applies to purchases made between 15\u202fNovember and 31\u202fDecember [returns-guide#2].",
+        "citations": [
+          "returns-guide#2"
+        ],
+        "attempts": 1,
+        "input_tokens": 834,
+        "retrieval_ms": 419.1,
+        "llm_ms": 1156.4
+      },
+      {
+        "id": "saturday-delivery",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Saturday delivery costs an extra $6 and is only available in the United Kingdom [shipping-guide#1].",
+        "citations": [
+          "shipping-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 834,
+        "retrieval_ms": 421.5,
+        "llm_ms": 918.4
+      },
+      {
+        "id": "account-lockout",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Your account is locked for 15 minutes after 5 failed sign\u2011in attempts [account-security-guide#0].",
+        "citations": [
+          "account-security-guide#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 768,
+        "retrieval_ms": 423.3,
+        "llm_ms": 722.4
+      },
+      {
+        "id": "backup-codes",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "You receive 10 backup codes for two-factor authentication [account-security-guide#1].",
+        "citations": [
+          "account-security-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 765,
+        "retrieval_ms": 401.1,
+        "llm_ms": 889.0
+      },
+      {
+        "id": "paypal-refund-speed",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "PayPal refunds usually appear within 24 hours [returns-guide#4].",
+        "citations": [
+          "returns-guide#4"
+        ],
+        "attempts": 1,
+        "input_tokens": 814,
+        "retrieval_ms": 444.3,
+        "llm_ms": 780.8
+      },
+      {
+        "id": "no-answer-ceo",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 801,
+        "retrieval_ms": 377.8,
+        "llm_ms": 780.1
+      },
+      {
+        "id": "no-answer-store",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 822,
+        "retrieval_ms": 388.4,
+        "llm_ms": 699.0
+      },
+      {
+        "id": "no-answer-price-match",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 813,
+        "retrieval_ms": 414.4,
+        "llm_ms": 690.4
+      }
+    ]
+  },
+  {
+    "config": "hybrid_rerank_large",
+    "ok": 10,
+    "total": 10,
+    "retrieval_rate": 1.0,
+    "hallucinated": 0,
+    "false_idk": 0,
+    "avg_input_tokens": 1012.4,
+    "avg_retrieval_ms": 775.9,
+    "avg_llm_ms": 2594.92,
+    "rows": [
+      {
+        "id": "return-window",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "You generally have 14 days from delivery to return an item [returns-guide#0][refund-policy#0]. If you purchased the item between 15\u202fNovember and 31\u202fDecember, you can return it until 31\u202fJanuary of the following year [returns-guide#0][returns-guide#1].",
+        "citations": [
+          "returns-guide#0",
+          "refund-policy#0",
+          "returns-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 1020,
+        "retrieval_ms": 861.5,
+        "llm_ms": 1037.7
+      },
+      {
+        "id": "opened-electronics",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Yes, opened headphones (as electronics) can be returned within the 14\u2011day window, but you will be charged a 15% restocking fee unless the item is faulty [returns-guide#0].",
+        "citations": [
+          "returns-guide#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 1014,
+        "retrieval_ms": 720.3,
+        "llm_ms": 4201.5
+      },
+      {
+        "id": "holiday-deadline",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Items bought between 15 November and 31 December can be returned until 31 January of the following year [returns-guide#1].",
+        "citations": [
+          "returns-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 1041,
+        "retrieval_ms": 727.5,
+        "llm_ms": 679.9
+      },
+      {
+        "id": "saturday-delivery",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Saturday delivery costs an extra $6 and is available only in the United Kingdom [shipping-guide#0].",
+        "citations": [
+          "shipping-guide#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 1019,
+        "retrieval_ms": 732.6,
+        "llm_ms": 3552.2
+      },
+      {
+        "id": "account-lockout",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "Your account is locked for 15 minutes after 5 failed sign\u2011in attempts [account-security-guide#0].",
+        "citations": [
+          "account-security-guide#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 907,
+        "retrieval_ms": 724.4,
+        "llm_ms": 2781.3
+      },
+      {
+        "id": "backup-codes",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "You receive 10 backup codes for two-factor authentication, and each code can be used only once [account-security-guide#0].",
+        "citations": [
+          "account-security-guide#0"
+        ],
+        "attempts": 1,
+        "input_tokens": 1013,
+        "retrieval_ms": 853.1,
+        "llm_ms": 975.8
+      },
+      {
+        "id": "paypal-refund-speed",
+        "diagnosis": "ok",
+        "fact_in_context": true,
+        "facts_in_answer": true,
+        "citation_ok": true,
+        "answerable": true,
+        "answer": "PayPal refunds usually appear within 24 hours [returns-guide#1].",
+        "citations": [
+          "returns-guide#1"
+        ],
+        "attempts": 1,
+        "input_tokens": 1034,
+        "retrieval_ms": 897.5,
+        "llm_ms": 7002.6
+      },
+      {
+        "id": "no-answer-ceo",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 1027,
+        "retrieval_ms": 753.5,
+        "llm_ms": 1441.9
+      },
+      {
+        "id": "no-answer-store",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 1176,
+        "retrieval_ms": 725.1,
+        "llm_ms": 3858.5
+      },
+      {
+        "id": "no-answer-price-match",
+        "diagnosis": "ok",
+        "fact_in_context": null,
+        "facts_in_answer": null,
+        "citation_ok": true,
+        "answerable": false,
+        "answer": "I don't know based on the available help articles.",
+        "citations": [],
+        "attempts": 1,
+        "input_tokens": 873,
+        "retrieval_ms": 763.5,
+        "llm_ms": 417.8
+      }
+    ]
+  }
+]
