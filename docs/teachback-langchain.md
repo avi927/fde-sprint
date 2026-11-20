@@ -18,7 +18,11 @@
 
 ## 4. Live demo (2 min)
 - python -m scripts.langchain_teachback
-- What the chain output lacks vs /ask: ?
+- What the chain output lacks vs /ask: no JSON validation, no citation check,
+  no retry, no IDK short-circuit, no dedupe/word budget, no timings/tokens.
+- Real example: chain cited [returns-guide#2], which was NOT in the retrieved
+  context (only #0, #1, #3, refund-sale-items#0) → hallucinated citation.
+  /ask's check_answer() rejects unknown citations and retries.
 
 ## 5. Trade-offs (2 min)
 - Gives: ?

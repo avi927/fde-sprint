@@ -230,6 +230,10 @@ Clients get short, safe messages (`{"detail": "..."}`); details go to the server
 
 ---
 
+## Evals section:-
+- python -m scripts.run_search_eval    # retrieval quality: Hit@1, Hit@3, MRR per strategy
+- python -m scripts.run_rag_eval       # answer quality: correct, cited, IDK, hallucination
+
 ## Evaluation results (latest)
 
 | Eval | Result | Evidence |

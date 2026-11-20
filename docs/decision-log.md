@@ -232,3 +232,47 @@ Entries with numbers link to the evidence (eval result files in `evals/results/`
   "money back" (matched only "get"); semantic 100% / 100% / 1.00 with and without prefix.
 - **Caveat:** Ceiling effect — the eval is too easy to separate the semantic variants.
 - **Next:** Harder eval, hybrid search (combine by rank) and reranking (Day 4).
+
+## Day 4 — Fri 20 Nov 2026
+
+### D4-1: Sentence-aligned chunking with overlap, two configs stored side by side
+- **Decision:** Split documents into sentence-aligned chunks with overlap. Two configs:
+  small (60 words / 15 overlap) and large (150 / 30), both stored in one `chunks`
+  table with a `chunk_config` column. Embed "title + chunk" (contextual header).
+- **Why:** Whole-document embeddings blur long guides; sentence alignment avoids cutting
+  facts in half; overlap keeps facts that sit on a boundary; storing both configs lets
+  us compare them with the same eval instead of guessing.
+- **Rejected:** Fixed character windows (cut sentences); one config only (no comparison).
+
+### D4-2: Hybrid search (RRF, k=60) + cross-encoder reranking
+- **Decision:** Run semantic + keyword search, fuse with Reciprocal Rank Fusion (k=60),
+  then rerank the top 20 candidates with a cross-encoder (ms-marco-MiniLM-L-6-v2).
+- **Why:** Keyword search catches exact codes (e.g. "E-4012"); semantic search catches
+  paraphrases; RRF combines ranks without tuning score scales; the cross-encoder reads
+  query + chunk together and fixes ordering on hard cases.
+- **Cost:** Retrieval ~106 ms → ~431 ms (reranker on CPU). Acceptable vs LLM time.
+
+### D4-3: RAG answer contract enforced in code
+- **Decision:** Prompt `rag_v1` + JSON output {answerable, answer}; exact IDK phrase when
+  the context lacks the answer; citations `[slug#n]` extracted by regex and validated
+  against retrieved source IDs; up to 3 attempts with feedback; empty context → IDK
+  without calling the LLM; context deduped (>60% overlap) and capped at 700 words.
+- **Why:** The prompt asks; the code verifies. Unverified citations look trustworthy
+  but can be fake (confirmed in the LangChain demo: model cited a source it never got).
+
+### D4-4: Defaults = hybrid + rerank + small chunks
+- **Decision:** `rag_search_mode=hybrid`, `rag_rerank=True`, `default_chunk_config=small`.
+- **Evidence:** RAG eval (rag_20261120-190729.json): semantic_small 10/10,
+  hybrid_rerank_small 9/10 → 10/10 after scorer date-format fix (re-run: ?),
+  hybrid_rerank_large 10/10 but ~25% more tokens (1012 vs 812) and slower LLM time.
+- **Caveat:** Ceiling effect — all configs ≈ 10/10, so this eval cannot separate them.
+  Hybrid + rerank chosen for robustness on exact codes and hard search cases
+  (search eval: ?). Revisit when harder RAG cases exist.
+
+### D4-5: Plain-Python RAG core; LangChain only as an adapter
+- **Decision:** Keep retrieval, context, validation and evals in plain Python; expose
+  search via a `BaseRetriever` adapter (`langchain-core` only).
+- **Why:** Full control and testability; minimal dependencies; no framework schema
+  lock-in. Demo showed a chain passing a hallucinated citation that /ask rejects.
+- **Rejected:** Rebuilding on langchain-postgres PGVector (own tables; doesn't fit our
+  chunks schema and migrations).
