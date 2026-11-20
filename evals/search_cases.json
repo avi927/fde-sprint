@@ -1,0 +1,62 @@
+[
+  {
+    "id": "money-back",
+    "query": "How do I get my money back?",
+    "relevant": ["refund-policy"],
+    "note": "Natural question, no shared key words with the article. Semantic should win."
+  },
+  {
+    "id": "error-code",
+    "query": "E-4012",
+    "relevant": ["error-e4012"],
+    "note": "Exact code. Keyword search should be strong here."
+  },
+  {
+    "id": "dark-theme",
+    "query": "Is there a dark theme?",
+    "relevant": ["dark-mode"],
+    "note": "Synonym: theme vs mode. Keyword still matches 'dark'."
+  },
+  {
+    "id": "login-other-country",
+    "query": "Someone logged into my account from another country",
+    "relevant": ["suspicious-activity"],
+    "note": "Meaning-based. Keyword may wrongly match 'logged' to the app-logout article."
+  },
+  {
+    "id": "ship-canada",
+    "query": "Do you ship to Canada?",
+    "relevant": ["international-shipping"],
+    "note": "Both should work: 'Canada' is an exact word, and the meaning is clear."
+  },
+  {
+    "id": "parcel-never-came",
+    "query": "My parcel never came",
+    "relevant": ["package-not-arrived"],
+    "note": "No shared words (parcel vs package). Semantic should win."
+  },
+  {
+    "id": "return-sale-item",
+    "query": "Can I return something I bought on sale?",
+    "relevant": ["refund-sale-items"],
+    "note": "Near-duplicate trap: the general refund policy is a strong distractor."
+  },
+  {
+    "id": "express-cost",
+    "query": "How much does express delivery cost?",
+    "relevant": ["delivery-times"],
+    "note": "Distractor: the premium article also mentions express delivery."
+  },
+  {
+    "id": "delete-my-data",
+    "query": "I want to delete all my personal data",
+    "relevant": ["delete-account-data"],
+    "note": "Both methods should find it."
+  },
+  {
+    "id": "app-version-crash",
+    "query": "app version 4.2 crash",
+    "relevant": ["app-crash-cart"],
+    "note": "Exact version number plus keywords. Keyword should be strong."
+  }
+]

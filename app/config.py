@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
     openai_base_url: str | None = None
+    embedding_use_query_prefix: bool = True
 
     # Models (small, cheap models for development)
     openai_model: str = "gpt-5-nano"

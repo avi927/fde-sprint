@@ -45,10 +45,17 @@ def embed_passages(texts: list[str]) -> list[np.ndarray]:
     return [_check_dimensions(vector) for vector in _get_model().embed(texts)]
 
 
-def embed_query(text: str) -> np.ndarray:
-    """Embed a search query, with the model's retrieval instruction in front."""
+def embed_query(text: str, use_prefix: bool | None = None) -> np.ndarray:
+    """Embed a search query, optionally with the model's retrieval instruction in front.
+
+    use_prefix=None means "follow the config setting".
+    """
     settings = get_settings()
-    vectors = _get_model().embed([settings.embedding_query_prefix + text])
+    if use_prefix is None:
+        use_prefix = settings.embedding_use_query_prefix
+    prefix = settings.embedding_query_prefix if use_prefix else ""
+
+    vectors = _get_model().embed([prefix + text])
     return _check_dimensions(next(iter(vectors)))
 
 def warm_up() -> None:

@@ -1,20 +1,28 @@
 # FDE Sprint API
 
-A small, production-style FastAPI backend that sends chat messages to Large Language Model (LLM) providers through one clean API.
+A production-style FastAPI backend for an AI customer-support assistant: LLM chat (with
+streaming), structured ticket triage, tool calling, and semantic + keyword search over a
+help-centre knowledge base stored in PostgreSQL with pgvector.
 
-It is the Day 1 foundation of a 3-week Forward Deployed Engineer (FDE) sprint. Later days add prompt management, structured outputs, retrieval (RAG), agents, MCP integrations, evaluation and deployment on top of it.
+Built during a 3-week Forward Deployed Engineer (FDE) sprint. Later days add RAG with
+citations, agents, MCP integrations, evaluation in CI and AWS deployment.
 
 ---
 
 ## Features
 
-- **One API, multiple providers:** any OpenAI-compatible provider (currently **Groq**) and **Anthropic**, behind a single `/chat` endpoint.
-- **Switch providers through config only:** change the base URL, key and model in `.env`, with no code changes.
-- **Typed, validated configuration** with Pydantic Settings; secrets are hidden as `**********` when printed or logged.
-- **Structured JSON logging**, with token usage and latency recorded for every LLM call.
-- **Safe defaults:** request timeouts, automatic retries, input length limits and output token limits.
-- **Clean error handling:** provider failures are translated into clear HTTP status codes (429, 502, 503, 504).
-- **Interactive API docs** (Swagger UI) generated automatically.
+- **LLM chat** through an OpenAI-compatible provider (currently **Groq**) or Anthropic, with
+  timeouts, retries and clean error codes — plus **streaming** (Server-Sent Events).
+- **Ticket triage** (`/triage`): returns validated JSON (category, priority, sentiment, summary,
+  needs_human) using versioned prompts (v1–v4), Pydantic validation and retry with feedback.
+- **Tool calling** (`/assistant`): the model can look up order status through a validated tool,
+  with a step limit.
+- **Semantic and keyword search** (`/search`) over 20 help-centre articles, with category filters.
+- **Local embeddings** (FastEmbed, `BAAI/bge-small-en-v1.5`) — no API key, data stays local.
+- **PostgreSQL 18 + pgvector** in Docker, with **SQL migrations** and **idempotent ingestion**.
+- **Evals**: triage prompt eval (per-field accuracy) and search eval (Hit@1, Hit@3, MRR).
+- **Safety**: delimiters + tag stripping against prompt injection, strict output schemas,
+  no secrets in prompts, metadata-only logging.
 
 ---
 
@@ -23,11 +31,12 @@ It is the Day 1 foundation of a 3-week Forward Deployed Engineer (FDE) sprint. L
 | Layer | Technology |
 |---|---|
 | Language | Python 3.14 |
-| Web framework | FastAPI |
-| Server | Uvicorn |
-| Validation and config | Pydantic, pydantic-settings |
+| API | FastAPI, Uvicorn, Pydantic, pydantic-settings |
 | LLM SDKs | OpenAI Python SDK (used with Groq), Anthropic Python SDK |
-| LLM provider (development) | Groq, model `openai/gpt-oss-120b` |
+| LLM (development) | Groq, `openai/gpt-oss-120b` |
+| Embeddings | FastEmbed (ONNX Runtime), `BAAI/bge-small-en-v1.5` (384 dims) |
+| Database | PostgreSQL 18 + pgvector 0.8 (Docker), psycopg 3 |
+| Infrastructure | Docker Desktop, Docker Compose |
 
 ---
 
@@ -36,316 +45,242 @@ It is the Day 1 foundation of a 3-week Forward Deployed Engineer (FDE) sprint. L
 ```
 fde-sprint/
 ├── app/
-│   ├── __init__.py          # Makes `app` a Python package
-│   ├── main.py              # FastAPI app and endpoints (/health, /chat)
-│   ├── config.py            # Typed settings loaded from .env
-│   ├── logging_config.py    # JSON logging setup
-│   ├── llm_clients.py       # OpenAI-compatible and Anthropic client wrappers
-│   └── schemas.py           # Request and response models for the API
-├── scripts/
-│   ├── __init__.py
-│   └── try_llm.py           # Quick terminal check that calls each provider
-├── docs/
-│   ├── provider-comparison.md
-│   └── decision-log.md
-├── logs/
-│   └── day-01.md            # Daily progress log
-├── .env.example             # Template for environment variables (no secrets)
-├── .gitignore
-├── requirements.txt         # Pinned dependencies
-└── README.md
+│   ├── main.py            # FastAPI app, error handlers, endpoints
+│   ├── config.py          # Typed settings from .env
+│   ├── logging_config.py  # JSON logging
+│   ├── llm_clients.py     # OpenAI-compatible + Anthropic clients, streaming
+│   ├── prompts.py         # Loads versioned prompt files
+│   ├── schemas.py         # Request/response models (the API contract)
+│   ├── triage.py          # Triage with validation + retry
+│   ├── tools.py           # Tools the assistant can call (get_order_status)
+│   ├── assistant.py       # Tool-calling loop
+│   ├── streaming.py       # LLM stream → Server-Sent Events
+│   ├── embeddings.py      # Embedding model adapter
+│   ├── db.py              # Database connections (pgvector registered)
+│   └── search.py          # Semantic + keyword search
+├── prompts/               # triage_v1–v4.md, chat_v1.md, assistant_v1.md
+├── migrations/            # 001–004 SQL migrations
+├── data/
+│   └── knowledge_base.json  # 20 help-centre articles
+├── evals/
+│   ├── triage_cases.json
+│   ├── search_cases.json
+│   └── results/           # Saved eval runs (evidence)
+├── scripts/               # Ingestion, migrations, evals, manual test tools
+├── docs/                  # decision-log.md, provider-comparison.md, safety-notes.md
+├── logs/                  # day-01.md, day-02.md, day-03.md
+├── docker-compose.yml
+├── progress.md
+├── .env.example
+└── requirements.txt
 ```
 
 ---
 
 ## Prerequisites
 
-- **Python 3.11 or higher** (developed on 3.14)
+- **Python 3.11+** (developed on 3.14)
+- **Docker Desktop** (running)
 - **Git**
-- An API key for at least one provider:
-  - **Groq** (free tier): [console.groq.com](https://console.groq.com)
-  - **OpenAI** (paid): [platform.openai.com](https://platform.openai.com)
-  - **Anthropic** (small starter credit): [console.anthropic.com](https://console.anthropic.com)
+- A **Groq** API key (free tier) — or an OpenAI key; Anthropic optional
 
 ---
 
 ## Setup
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/<your-username>/fde-sprint.git
-cd fde-sprint
-```
-
-### 2. Create and activate a virtual environment
-
-**Windows (PowerShell)**
+### 1. Clone and create a virtual environment
 
 ```powershell
+git clone https://github.com/<your-username>/fde-sprint.git
+cd fde-sprint
 py -3.14 -m venv .venv
 .venv\Scripts\activate
-```
-
-> If PowerShell says *"running scripts is disabled"*, run this once and try again:
-> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
-
-**macOS / Linux**
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-Your terminal prompt should now start with `(.venv)`.
-
-### 3. Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure environment variables
+(macOS/Linux: `python3 -m venv .venv` and `source .venv/bin/activate`.)
 
-Copy the template:
+### 2. Configure
 
 ```powershell
-# Windows
 copy .env.example .env
 ```
 
-```bash
-# macOS / Linux
-cp .env.example .env
+Fill in your API key and a local database password (see [Configuration](#configuration)).
+
+### 3. Start the database
+
+```powershell
+docker compose up -d
+docker compose ps      # wait for "healthy"
 ```
 
-Then open `.env` and fill in your keys (see [Configuration](#configuration)).
+### 4. Create the schema and load the knowledge base
 
-> ⚠️ **Never commit `.env`.** It is already listed in `.gitignore`.
+```powershell
+python -m scripts.migrate     # applies migrations 001–004
+python -m scripts.ingest      # embeds and stores 20 articles (first run downloads the model, ~67 MB)
+python -m scripts.db_check    # should show localhost:5433, Debian/linux, pgvector 0.8.x
+```
+
+### 5. Run the API
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+Swagger UI: **http://127.0.0.1:8000/docs**
+
+> **Port note:** the Docker database is published on **5433** (not 5432) to avoid clashing
+> with a locally installed PostgreSQL. If you connect with pgAdmin/DBeaver, use port 5433.
 
 ---
 
 ## Configuration
 
-All settings are read from `.env` (or from real environment variables, which take priority).
+Settings come from `.env` (real environment variables take priority). Restart the server after
+changes — settings are cached.
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `ENVIRONMENT` | No | `dev` | One of `dev`, `staging`, `prod`. Any other value stops the app at startup. |
-| `LOG_LEVEL` | No | `INFO` | One of `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
-| `OPENAI_API_KEY` | For `provider: "openai"` | — | Key for the OpenAI-compatible provider (currently a **Groq** key). |
-| `OPENAI_BASE_URL` | No | OpenAI's URL | Server to call. For Groq: `https://api.groq.com/openai/v1`. Leave empty for real OpenAI. |
-| `OPENAI_MODEL` | No | `gpt-5-nano` | Model name on that server, e.g. `openai/gpt-oss-120b` on Groq. |
-| `ANTHROPIC_API_KEY` | For `provider: "anthropic"` | — | Anthropic API key (starts with `sk-ant-api`). |
-| `ANTHROPIC_MODEL` | No | `claude-haiku-5-5` | Anthropic model name. |
-| `LLM_TIMEOUT_SECONDS` | No | `30.0` | Maximum time to wait for a provider response. |
-| `LLM_MAX_OUTPUT_TOKENS` | No | `1000` | Maximum tokens in a reply (cost safety limit). |
-
-### Example `.env` for Groq
-
-```
-ENVIRONMENT=dev
-LOG_LEVEL=INFO
-
-OPENAI_API_KEY=your-groq-key
-OPENAI_BASE_URL=https://api.groq.com/openai/v1
-OPENAI_MODEL=openai/gpt-oss-120b
-
-ANTHROPIC_API_KEY=
-ANTHROPIC_MODEL=claude-haiku-5-5
-```
-
-### Switching from Groq to real OpenAI
-
-Change only `.env`; no code changes needed:
-
-```
-OPENAI_API_KEY=your-openai-key
-OPENAI_BASE_URL=
-OPENAI_MODEL=gpt-5-nano
-```
-
-> Settings are cached when the app starts. **Restart the server after editing `.env`.**
-
----
-
-## Running the API
-
-```bash
-uvicorn app.main:app --reload
-```
-
-- The API runs at **http://127.0.0.1:8000**
-- Swagger UI (interactive docs): **http://127.0.0.1:8000/docs**
-- `--reload` restarts the server automatically when a `.py` file changes. Use it in development only.
-
-### Quick provider check (without the API)
-
-```bash
-python -m scripts.try_llm
-```
-
-This calls each configured provider once and prints the reply, token counts and latency.
-
-> Run it with `python -m` from the project root. Running `python scripts/try_llm.py` directly fails with `No module named 'app'`.
+| Variable | Default | Description |
+|---|---|---|
+| `ENVIRONMENT` | `dev` | `dev`, `staging` or `prod` (anything else stops the app) |
+| `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `OPENAI_API_KEY` | — | Key for the OpenAI-compatible provider (currently a Groq key) |
+| `OPENAI_BASE_URL` | OpenAI | `https://api.groq.com/openai/v1` for Groq |
+| `OPENAI_MODEL` | `gpt-5-nano` | e.g. `openai/gpt-oss-120b` on Groq |
+| `ANTHROPIC_API_KEY` | — | Optional |
+| `ANTHROPIC_MODEL` | `claude-haiku-5-5` | Anthropic model |
+| `LLM_TIMEOUT_SECONDS` | `30.0` | Max wait for a provider response |
+| `LLM_MAX_OUTPUT_TOKENS` | `1000` | Max tokens per reply (includes hidden reasoning) |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | — | Used by Docker **only when the volume is first created** |
+| `DATABASE_URL` | — | `postgresql://<user>:<password>@localhost:5433/fde_sprint` |
+| `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` | Changing it requires a migration + re-ingestion |
+| `EMBEDDING_DIMENSIONS` | `384` | Must match the model and the `vector(384)` column |
+| `EMBEDDING_USE_QUERY_PREFIX` | `true` | Add the BGE retrieval instruction to search queries |
 
 ---
 
 ## API endpoints
 
-### `GET /health`
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | Server alive + which LLM providers are configured |
+| POST | `/chat` | One message → one reply (`provider`: `openai` or `anthropic`) |
+| POST | `/chat/stream` | Same, streamed as Server-Sent Events (use curl or `scripts/stream_client.py`; Swagger shows it only at the end) |
+| POST | `/triage` | Support ticket → validated JSON triage (`prompt_version` v1–v4, default v4) |
+| POST | `/assistant` | Customer question → answer, calling `get_order_status` when needed |
+| POST | `/search` | Knowledge base search (`mode`: `semantic` or `keyword`, optional `category`, `top_k` 1–20) |
 
-Checks that the server is running and shows which providers are configured. It never shows the keys themselves.
+> `provider: "openai"` means the **OpenAI-format code path**; the server it calls is set by
+> `OPENAI_BASE_URL` (currently Groq).
 
-**Response `200`**
+### Example: search
+
+```json
+POST /search
+{"query": "How do I get my money back?", "top_k": 3, "mode": "semantic"}
+```
 
 ```json
 {
-  "status": "ok",
-  "environment": "dev",
-  "openai_configured": true,
-  "anthropic_configured": false
+  "query": "How do I get my money back?",
+  "top_k": 3,
+  "category": null,
+  "mode": "semantic",
+  "results": [
+    {"slug": "refund-policy", "title": "Refund policy", "category": "billing", "score": 0.673, "content": "..."}
+  ],
+  "embedding_ms": 16.5,
+  "db_ms": 45.5
 }
 ```
 
-> `configured` only means a key is present, not that it is valid.
-
-### `POST /chat`
-
-Sends one message to the chosen provider and returns the reply with usage metrics.
-
-**Request body**
-
-| Field | Type | Required | Rules |
-|---|---|---|---|
-| `message` | string | Yes | 1–4000 characters |
-| `provider` | string | No | `"openai"` (default) or `"anthropic"` |
-
-> `"openai"` means the **OpenAI-compatible** code path. It calls whichever server `OPENAI_BASE_URL` points to (currently Groq).
-
-**Example request**
-
-```json
-{
-  "message": "In one sentence, what is a Forward Deployed Engineer?",
-  "provider": "openai"
-}
-```
-
-**Response `200`**
-
-```json
-{
-  "provider": "openai-compatible",
-  "model": "openai/gpt-oss-120b",
-  "reply": "A Forward Deployed Engineer is a software engineer who works directly with customers...",
-  "input_tokens": 98,
-  "output_tokens": 78,
-  "latency_ms": 881.7
-}
-```
-
-**Calling it from the terminal**
-
-PowerShell:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/chat `
-  -ContentType "application/json" `
-  -Body '{"message": "What is an FDE?", "provider": "openai"}'
-```
-
-macOS / Linux:
-
-```bash
-curl -X POST http://127.0.0.1:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What is an FDE?", "provider": "openai"}'
-```
+Scores are only comparable **within the same mode**.
 
 ---
 
 ## Error responses
 
-| Code | Meaning | When it happens | What the client should do |
-|---|---|---|---|
-| **422** | Unprocessable Content | Invalid input: empty or too-long `message`, unknown `provider` | Fix the request |
-| **429** | Too Many Requests | The provider is rate-limiting this server | Wait and retry |
-| **502** | Bad Gateway | The provider returned an error (e.g. invalid server key, wrong model name, provider outage) | Retry later; the server team checks the logs |
-| **503** | Service Unavailable | The chosen provider has no API key configured | Use another provider, or the server team adds the key |
-| **504** | Gateway Timeout | The provider did not answer within `LLM_TIMEOUT_SECONDS` | Retry |
+| Code | When |
+|---|---|
+| 422 | Invalid input (validation) |
+| 429 | The LLM provider is rate-limiting us |
+| 500 | Server configuration error (e.g. missing prompt file) |
+| 502 | LLM provider error; triage couldn't produce valid JSON after 3 attempts; assistant hit its step limit |
+| 503 | LLM provider not configured; database not configured or unreachable |
+| 504 | LLM provider timeout |
 
-Error responses use FastAPI's standard format:
+Clients get short, safe messages (`{"detail": "..."}`); details go to the server logs.
 
-```json
-{ "detail": "Provider 'anthropic' is not configured on this server." }
-```
+---
 
-Responses to clients are deliberately short and safe. Full details (error type, provider status code) are written to the server logs.
+## Scripts
+
+| Command | Purpose |
+|---|---|
+| `python -m scripts.migrate` | Apply database migrations (idempotent) |
+| `python -m scripts.ingest` | Embed and upsert the knowledge base (idempotent) |
+| `python -m scripts.db_check` | Show target DB, server version, pgvector version |
+| `python -m scripts.run_eval [v3 v4]` | Triage prompt eval (per-field accuracy) |
+| `python -m scripts.run_search_eval` | Search eval: keyword vs semantic (Hit@1, Hit@3, MRR) |
+| `python -m scripts.try_llm` | Call each LLM provider once |
+| `python -m scripts.try_prompts "ticket"` | Compare triage prompt versions on one ticket |
+| `python -m scripts.stream_client "message"` | Watch `/chat/stream` live |
+| `python -m scripts.embedding_playground` | Explore embeddings and similarity |
+
+---
+
+## Evaluation results (latest)
+
+| Eval | Result | Evidence |
+|---|---|---|
+| Triage prompts (12 cases) | v4: **12/12**, v3: 10/12 | `evals/results/triage_*.json` |
+| Search (10 queries) | Semantic Hit@3 **100%**, keyword **80%** | `evals/results/search_*.json` |
+
+Caveat: the search eval is small (20 docs) and shows a ceiling effect; a harder set is planned.
 
 ---
 
 ## Logging
 
-The app writes **one JSON object per line** to the terminal, so logs can be searched and filtered (for example in AWS CloudWatch).
-
-```json
-{"time": "2026-11-17T15:41:36.517401+00:00", "level": "INFO", "logger": "app.llm_clients", "message": "llm_call_completed", "provider": "openai-compatible", "model": "openai/gpt-oss-120b", "input_tokens": 99, "output_tokens": 109, "latency_ms": 959.9}
-```
-
-| Event | Level | Meaning |
-|---|---|---|
-| `app_starting` | INFO | App started; shows environment and configured providers |
-| `health_checked` | INFO | `/health` was called |
-| `llm_call_completed` | INFO | An LLM call succeeded; includes tokens and latency |
-| `provider_not_configured` | WARNING | `/chat` was called for a provider without a key |
-| `llm_timeout` | WARNING | The provider was too slow |
-| `llm_rate_limited` | WARNING | The provider rate-limited the request |
-| `llm_provider_error` | ERROR | Any other provider failure; includes error type and status |
-
-**Privacy rule:** logs contain metadata only (provider, model, tokens, latency). **Prompts, replies and API keys are never logged**, because they may contain customer data.
-
-Uvicorn's own server logs remain in plain-text format.
+One JSON object per line; **metadata only** — prompts, replies, search queries and keys are
+never logged. Key events: `app_starting`, `embedding_model_ready`, `llm_call_completed`,
+`triage_completed`, `triage_invalid_output`, `tool_called`, `assistant_completed`,
+`stream_completed`, `search_completed`, and error events (`llm_timeout`, `llm_rate_limited`,
+`llm_provider_error`, `database_unavailable`, …).
 
 ---
 
-## Design decisions
+## Design decisions and docs
 
-Key decisions and their reasons are recorded in [`docs/decision-log.md`](docs/decision-log.md). Highlights:
-
-- **Chat Completions API instead of OpenAI's Responses API:** it is the format other providers copy, so one code path works with Groq, OpenAI and others.
-- **Adapter pattern:** every provider returns the same internal `LLMResult`, so the rest of the app never depends on one vendor.
-- **Separate public and internal models:** `ChatResponse` is the public API contract; `LLMResult` can change without breaking clients.
-
-Provider evaluation (cost, latency, limits, data policy): [`docs/provider-comparison.md`](docs/provider-comparison.md).
+- [`docs/decision-log.md`](docs/decision-log.md) — every design choice, why, and what was rejected
+- [`docs/provider-comparison.md`](docs/provider-comparison.md) — LLM provider comparison
+- [`docs/safety-notes.md`](docs/safety-notes.md) — attacks tested and defenses
+- [`progress.md`](progress.md) — daily status (Green/Amber/Red)
+- [`logs/`](logs/) — daily logs
 
 ---
 
 ## Known limitations
 
-- **Anthropic is not configured yet** (no API key), so `provider: "anthropic"` returns `503`.
-- **No authentication:** anyone who can reach the server can call `/chat`. Planned for Day 12.
-- **No automated tests yet.** Planned for Day 9 (pytest and HTTPX).
-- **No streaming:** replies arrive all at once. Planned for Day 2.
-- **Single message only:** there is no conversation history between calls.
-- **Free-tier rate limits** on Groq can return `429` under heavy use.
-- Uvicorn's own logs are plain text, not JSON.
+- Anthropic is not configured (no API key) → `provider: "anthropic"` returns 503.
+- **No authentication** — planned for Day 12.
+- **No automated tests** (pytest) yet — planned for Day 9.
+- Streaming supports only the OpenAI-compatible path.
+- No conversation memory between `/chat` calls.
+- Groq free-tier rate limits can return 429 (and slow down evals).
+- New database connection per search (~45 ms) — connection pool planned.
+- Embeddings are **English only**; semantic search is weak on negation.
+- The app connects as the `postgres` superuser — dedicated limited user planned (Day 12).
+- Cost per request in $ is not tracked yet (tokens are) — planned for Day 13.
 
 ---
 
 ## Roadmap
 
-| Day | Planned addition |
+| Day | Next |
 |---|---|
-| 2 | Versioned prompt files, structured JSON output, streaming, tool calling |
-| 3 | Embeddings and semantic search with PostgreSQL + pgvector |
-| 4 | Full RAG pipeline with citations |
-| 6+ | MCP server and third-party integrations |
-| 9 | Automated tests, hardening |
-| 11–13 | Docker, AWS deployment, authentication, CI/CD, evals |
-
----
-
-## Progress logs
-
-Daily logs are in [`logs/`](logs/), starting with [`logs/day-01.md`](logs/day-01.md).
+| 4 | RAG pipeline: chunking, hybrid search, reranking, answers with citations, "I don't know" |
+| 5 | RAG v1 demo, break-it session, track choice (MCP & integrations) |
+| 6–10 | MCP server + third-party integrations, n8n, webhooks |
+| 11–13 | Docker for the API, AWS deployment, auth, CI/CD, evals in CI |

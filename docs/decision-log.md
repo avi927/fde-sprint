@@ -152,9 +152,83 @@ Entries with numbers link to the evidence (eval result files in `evals/results/`
   at all always reach a human?
 - **Revisit when:** The customer answers → add an explicit rule (v5) and tighten the case.
 
-DAY 3:- 
-1-“Database schema managed with numbered SQL migrations and a small runner (scripts/migrate.py, tracking table schema_migrations, one transaction per migration). Why: reproducible on any fresh database (teammates, AWS, tests), history in Git, idempotent. Rule: never edit an applied migration; add a new one. Rejected: manual SQL in psql (not reproducible). Production alternative: Alembic.”
+---
 
-2-“documents table: vector(384) (matches bge-small), JSONB metadata for flexible attributes, unique slug for idempotent ingestion, timestamptz timestamps. Why JSONB: customers’ metadata varies; no schema change needed. Trade-off: less strict than real columns.”
+## Day 3 — 19–20 Nov 2026
 
-3-“HNSW index with vector_cosine_ops (matches the <=> cosine operator) + GIN index on metadata. Why: approximate nearest-neighbour search and fast JSONB filters at scale. Note: the operator class must match the query operator or the index is silently ignored.”
+### 2026-11-19 — Embedding model: FastEmbed with BAAI/bge-small-en-v1.5 (local)
+
+- **Decision:** Local embeddings with FastEmbed (ONNX Runtime), `BAAI/bge-small-en-v1.5`
+  (384 dimensions, English).
+- **Why:** Free, no API key, no rate limits (we re-embed and re-run evals often), documents
+  never leave the machine, no GPU needed.
+- **Rejected:** Groq (no reliable embeddings endpoint); Voyage/Gemini free tiers (rate limits,
+  external data transfer); OpenAI (paid).
+- **Trade-offs:** English only; smaller than top API models.
+- **Rule:** The same model embeds documents and queries; changing it means re-embedding everything.
+
+### 2026-11-19 — PostgreSQL 18 + pgvector in Docker Compose, host port 5433
+
+- **Decision:** `pgvector/pgvector:pg18` (pinned tag), named volume, `pg_isready` healthcheck,
+  published on host port **5433**.
+- **Why:** Matches common customer stacks; vectors next to metadata in one SQL query; same
+  container locally and on AWS. Port 5433 because a local Windows PostgreSQL already uses 5432
+  (clients silently connected to the wrong server).
+- **Rejected:** A dedicated vector database (another product to operate); installing
+  PostgreSQL directly on Windows (not reproducible).
+- **Open item (Day 12):** The app connects as the `postgres` superuser — create a dedicated,
+  limited DB user (least privilege).
+
+### 2026-11-19 — SQL migrations with a small runner
+
+- **Decision:** Numbered SQL files in `migrations/`, applied by `scripts/migrate.py`, tracked in
+  `schema_migrations`, one transaction per migration.
+- **Why:** Reproducible on any fresh database, history in Git, idempotent.
+- **Rule:** Never edit an applied migration — add a new one (e.g. 004 for full-text search).
+- **Production alternative:** Alembic.
+
+### 2026-11-19 — `documents` table design
+
+- **Decision:** `vector(384)`, JSONB `metadata`, unique `slug`, `timestamptz` timestamps.
+- **Why JSONB:** Customer metadata varies; no schema change needed. **Trade-off:** less strict
+  than real columns.
+- **Indexes:** HNSW with `vector_cosine_ops` (must match the `<=>` operator, or the index is
+  silently ignored) and GIN on `metadata`.
+
+### 2026-11-20 — Embedding adapter and query prefix
+
+- **Decision:** `app/embeddings.py` is the only module that knows the embedding library;
+  `embed_passages()` for documents, `embed_query()` for queries with the BGE retrieval
+  instruction from config (switchable via `EMBEDDING_USE_QUERY_PREFIX`).
+- **Why:** Same model guaranteed for both; switching providers is a one-file change; the prefix
+  addresses the query–document asymmetry seen in the playground.
+- **Model cache** in the project's `.cache/fastembed` (git-ignored), not Windows Temp.
+
+### 2026-11-20 — Idempotent ingestion
+
+- **Decision:** Validate with Pydantic, reject duplicate slugs, embed `title + content`,
+  upsert (`ON CONFLICT (slug) DO UPDATE`) in one transaction.
+- **Why:** Safe to re-run; bad data never reaches the index; never half-updated.
+- **Known cost:** Re-embeds every document each run → later: skip unchanged docs via content hash.
+
+### 2026-11-20 — `/search` design
+
+- **Decision:** `POST /search` (query, top_k 1–20, optional category, mode semantic|keyword);
+  `score` field (similarity for semantic, `ts_rank_cd` for keyword — not comparable across modes);
+  category filter as JSONB `@>` inside the same query; optional filters built from fixed SQL
+  fragments with user values only as parameters; `ORDER BY embedding <=> …` so HNSW can be used.
+- **Also:** Model warm-up at startup (FastAPI lifespan) — removes ~1 s cold start;
+  DB unavailable → 503.
+- **Known gaps:** New DB connection per search (~45 ms) → connection pool later.
+- **API change:** `similarity` renamed to `score` (version 0.5.0) — breaking for clients.
+
+### 2026-11-20 — Keyword search with OR, and default search mode
+
+- **Decision:** Full-text search via migration 004 (generated `tsvector`, title weight A /
+  content weight B, GIN index); keyword queries use **OR** (AND returns nothing for natural
+  questions). Default mode: **semantic with query prefix**.
+- **Evidence (10 queries, 20 docs, `search_20261119-203814.json`):**
+  keyword Hit@1 80% / Hit@3 80% / MRR 0.80 — failed on "parcel never came" (no results) and
+  "money back" (matched only "get"); semantic 100% / 100% / 1.00 with and without prefix.
+- **Caveat:** Ceiling effect — the eval is too easy to separate the semantic variants.
+- **Next:** Harder eval, hybrid search (combine by rank) and reranking (Day 4).

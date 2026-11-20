@@ -1,0 +1,176 @@
+[
+  {
+    "config": "keyword",
+    "hit_at_1": 0.8,
+    "hit_at_3": 0.8,
+    "mrr": 0.8,
+    "details": [
+      {
+        "id": "money-back",
+        "rank": null,
+        "top_1": "contact-support"
+      },
+      {
+        "id": "error-code",
+        "rank": 1,
+        "top_1": "error-e4012"
+      },
+      {
+        "id": "dark-theme",
+        "rank": 1,
+        "top_1": "dark-mode"
+      },
+      {
+        "id": "login-other-country",
+        "rank": 1,
+        "top_1": "suspicious-activity"
+      },
+      {
+        "id": "ship-canada",
+        "rank": 1,
+        "top_1": "international-shipping"
+      },
+      {
+        "id": "parcel-never-came",
+        "rank": null,
+        "top_1": null
+      },
+      {
+        "id": "return-sale-item",
+        "rank": 1,
+        "top_1": "refund-sale-items"
+      },
+      {
+        "id": "express-cost",
+        "rank": 1,
+        "top_1": "delivery-times"
+      },
+      {
+        "id": "delete-my-data",
+        "rank": 1,
+        "top_1": "delete-account-data"
+      },
+      {
+        "id": "app-version-crash",
+        "rank": 1,
+        "top_1": "app-crash-cart"
+      }
+    ]
+  },
+  {
+    "config": "semantic_no_prefix",
+    "hit_at_1": 1.0,
+    "hit_at_3": 1.0,
+    "mrr": 1.0,
+    "details": [
+      {
+        "id": "money-back",
+        "rank": 1,
+        "top_1": "refund-policy"
+      },
+      {
+        "id": "error-code",
+        "rank": 1,
+        "top_1": "error-e4012"
+      },
+      {
+        "id": "dark-theme",
+        "rank": 1,
+        "top_1": "dark-mode"
+      },
+      {
+        "id": "login-other-country",
+        "rank": 1,
+        "top_1": "suspicious-activity"
+      },
+      {
+        "id": "ship-canada",
+        "rank": 1,
+        "top_1": "international-shipping"
+      },
+      {
+        "id": "parcel-never-came",
+        "rank": 1,
+        "top_1": "package-not-arrived"
+      },
+      {
+        "id": "return-sale-item",
+        "rank": 1,
+        "top_1": "refund-sale-items"
+      },
+      {
+        "id": "express-cost",
+        "rank": 1,
+        "top_1": "delivery-times"
+      },
+      {
+        "id": "delete-my-data",
+        "rank": 1,
+        "top_1": "delete-account-data"
+      },
+      {
+        "id": "app-version-crash",
+        "rank": 1,
+        "top_1": "app-crash-cart"
+      }
+    ]
+  },
+  {
+    "config": "semantic_prefix",
+    "hit_at_1": 1.0,
+    "hit_at_3": 1.0,
+    "mrr": 1.0,
+    "details": [
+      {
+        "id": "money-back",
+        "rank": 1,
+        "top_1": "refund-policy"
+      },
+      {
+        "id": "error-code",
+        "rank": 1,
+        "top_1": "error-e4012"
+      },
+      {
+        "id": "dark-theme",
+        "rank": 1,
+        "top_1": "dark-mode"
+      },
+      {
+        "id": "login-other-country",
+        "rank": 1,
+        "top_1": "suspicious-activity"
+      },
+      {
+        "id": "ship-canada",
+        "rank": 1,
+        "top_1": "international-shipping"
+      },
+      {
+        "id": "parcel-never-came",
+        "rank": 1,
+        "top_1": "package-not-arrived"
+      },
+      {
+        "id": "return-sale-item",
+        "rank": 1,
+        "top_1": "refund-sale-items"
+      },
+      {
+        "id": "express-cost",
+        "rank": 1,
+        "top_1": "delivery-times"
+      },
+      {
+        "id": "delete-my-data",
+        "rank": 1,
+        "top_1": "delete-account-data"
+      },
+      {
+        "id": "app-version-crash",
+        "rank": 1,
+        "top_1": "app-crash-cart"
+      }
+    ]
+  }
+]
