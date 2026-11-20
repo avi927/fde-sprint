@@ -1,9 +1,9 @@
 """Request and response shapes for the API, validated by Pydantic."""
 
 from typing import Literal
-from app.streaming import sse_events
-from pydantic import BaseModel, Field
+
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class ChatRequest(BaseModel):
     """What the client sends to /chat."""
@@ -29,6 +29,18 @@ class ChatResponse(BaseModel):
     input_tokens: int
     output_tokens: int
     latency_ms: float
+
+
+class StreamChatRequest(BaseModel):
+    """What the client sends to /chat/stream."""
+
+    message: str = Field(
+        min_length=1,
+        max_length=4000,
+        description="The user's question or instruction.",
+        examples=["Explain what a Forward Deployed Engineer does in 3 short paragraphs."],
+    )
+
 
 class TriageResult(BaseModel):
     """The exact JSON the model must return for one ticket."""
@@ -66,9 +78,9 @@ class TriageResponse(BaseModel):
     prompt_version: str
     model: str
     attempts: int
-    input_tokens: int 
+    input_tokens: int
     output_tokens: int
-    latency_ms: float    
+    latency_ms: float
 
 
 class AssistantRequest(BaseModel):
@@ -91,16 +103,6 @@ class AssistantResponse(BaseModel):
     input_tokens: int
     output_tokens: int
 
-class StreamChatRequest(BaseModel):
-    """What the client sends to /chat/stream."""
-
-    message: str = Field(
-        min_length=1,
-        max_length=4000,
-        description="The user's question or instruction.",
-        examples=["Explain what a Forward Deployed Engineer does in 3 short paragraphs."],
-    )
-
 
 class SearchRequest(BaseModel):
     """What the client sends to /search."""
@@ -116,7 +118,6 @@ class SearchRequest(BaseModel):
         default=None,
         description="Only search documents in this category (optional).",
     )
-<<<<<<< HEAD
     mode: Literal["semantic", "keyword"] = Field(
         default="semantic",
         description="semantic = by meaning (embeddings); keyword = by words (full-text).",
@@ -125,22 +126,12 @@ class SearchRequest(BaseModel):
 
 class SearchHit(BaseModel):
     """One search result. Scores are only comparable within the same mode."""
-=======
-
-
-class SearchHit(BaseModel):
-    """One search result."""
->>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
 
     slug: str
     title: str
     content: str
     category: str
-<<<<<<< HEAD
     score: float
-=======
-    similarity: float
->>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
 
 
 class SearchResponse(BaseModel):
@@ -149,10 +140,7 @@ class SearchResponse(BaseModel):
     query: str
     top_k: int
     category: str | None
-<<<<<<< HEAD
     mode: str
-=======
->>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
     results: list[SearchHit]
     embedding_ms: float
     db_ms: float

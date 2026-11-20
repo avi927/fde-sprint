@@ -51,16 +51,13 @@ def embed_query(text: str, use_prefix: bool | None = None) -> np.ndarray:
     use_prefix=None means "follow the config setting".
     """
     settings = get_settings()
-<<<<<<< HEAD
     if use_prefix is None:
         use_prefix = settings.embedding_use_query_prefix
     prefix = settings.embedding_query_prefix if use_prefix else ""
 
     vectors = _get_model().embed([prefix + text])
-=======
-    vectors = _get_model().embed([settings.embedding_query_prefix + text])
->>>>>>> 807cdba545d43a1166a8cf197ef31ea4599e6bd0
     return _check_dimensions(next(iter(vectors)))
+
 
 def warm_up() -> None:
     """Load the model now, so the first real request doesn't pay the loading time."""
