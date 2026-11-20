@@ -138,5 +138,26 @@
     "category": "other",
     "updated_at": "2026-08-20",
     "content": "You can reach support by chat in the app or by email at support@example-store.com, Monday to Friday, 9 am to 6 pm. Premium members get priority replies."
+  },
+  {
+    "slug": "returns-guide",
+    "title": "Complete returns and refunds guide",
+    "category": "billing",
+    "updated_at": "2026-11-01",
+    "content": "This guide explains every rule for returns, exchanges and refunds. For a short summary, see the Refund policy article.\n\nMost items can be returned within 14 days of delivery for a full refund. Items must be unused, with tags attached, and in their original packaging. Start a return from Orders, then Return item. We email a prepaid return label for orders over $50. For smaller orders, return shipping costs $4.95, which is deducted from your refund.\n\nElectronics follow the same 14-day window. Unopened electronics get a full refund. Opened electronics are refunded minus a 15% restocking fee, unless they are faulty. Software, gift cards and digital downloads cannot be returned once delivered.\n\nItems bought between 15 November and 31 December can be returned until 31 January of the following year. This holiday extension applies to all categories except final-sale items.\n\nIf you received an item as a gift, you can return it for store credit using the gift receipt. The person who bought the gift is not notified and is not refunded.\n\nAfter we receive your return, we inspect it within 2 business days. Approved refunds go back to the original payment method within 5 business days. Banks can take another 3 to 5 business days to show the money in your account. PayPal refunds usually appear within 24 hours.\n\nTo exchange an item for a different size or colour, start a return and choose Exchange. We ship the replacement as soon as the carrier scans the returned item, so you don't have to wait for it to reach our warehouse."
+  },
+  {
+    "slug": "shipping-guide",
+    "title": "Complete shipping guide",
+    "category": "shipping",
+    "updated_at": "2026-11-01",
+    "content": "This guide covers processing times, delivery options, restrictions, international orders and tracking.\n\nOrders placed before 2 pm on a business day ship the same day. Orders placed after 2 pm, on weekends or on public holidays ship the next business day.\n\nStandard delivery takes 3 to 5 business days and is free on orders over $35. Below $35, standard delivery costs $4.99. Express delivery takes 1 to 2 business days and costs $9.99. Saturday delivery is available only in the United Kingdom, for an extra $6.\n\nWe cannot deliver to PO boxes with express delivery. Items over 30 kg, such as furniture, are shipped by freight, and we schedule the delivery with you by phone. Batteries and aerosols cannot be shipped by air, so they always use standard ground delivery.\n\nInternational orders take 7 to 12 business days. Customs fees and import taxes are paid by the customer on delivery. We do not ship to Australia or Japan yet.\n\nYou receive a tracking link by email when your order ships. Tracking can take up to 24 hours to show the first update."
+  },
+  {
+    "slug": "account-security-guide",
+    "title": "Account security guide",
+    "category": "account",
+    "updated_at": "2026-11-01",
+    "content": "Keeping your account safe protects your orders, saved cards and personal data.\n\nPasswords must be at least 12 characters long. After 5 failed sign-in attempts, your account is locked for 15 minutes. Password reset links are valid for 30 minutes.\n\nTwo-factor authentication can use an authenticator app or SMS codes. If you lose your phone, use one of the 10 backup codes you saved when you turned on two-factor authentication. Each backup code works only once.\n\nYou can see every device signed in to your account under Settings, then Security, then Active sessions, and sign out of any device remotely. Sessions on the mobile app expire after 30 days without activity.\n\nWe never ask for your password or full card number by email, chat or phone. Our emails always come from an address ending in @example-store.com. Forward suspicious messages to security@example-store.com.\n\nIf you think your account was compromised, reset your password, sign out of all sessions and contact support. We review recent activity within 24 hours and cancel unauthorized orders."
   }
 ]
