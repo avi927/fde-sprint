@@ -72,3 +72,23 @@ def _make_chunk(index: int, sentences: list[str]) -> Chunk:
     """Join sentences into one chunk."""
     text = " ".join(sentences)
     return Chunk(index=index, text=text, word_count=len(text.split()))
+
+
+@dataclass(frozen=True)
+class ChunkConfig:
+    """A named chunking setting."""
+
+    name: str
+    max_words: int
+    overlap_words: int
+
+
+CHUNK_CONFIGS: dict[str, ChunkConfig] = {
+    "small": ChunkConfig(name="small", max_words=60, overlap_words=15),
+    "large": ChunkConfig(name="large", max_words=150, overlap_words=30),
+}
+
+
+def chunk_embedding_text(title: str, content: str) -> str:
+    """Text we embed for a chunk: document title as a header, then the chunk itself."""
+    return f"{title}\n\n{content}"

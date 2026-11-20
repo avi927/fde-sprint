@@ -111,9 +111,9 @@ class SearchRequest(BaseModel):
         min_length=1,
         max_length=500,
         description="The question or search text.",
-        examples=["How do I get my money back?"],
+        examples=["Can I return opened headphones?"],
     )
-    top_k: int = Field(default=5, ge=1, le=20, description="How many results to return.")
+    top_k: int = Field(default=5, ge=1, le=20, description="How many chunks to return.")
     category: Literal["billing", "shipping", "technical", "account", "other"] | None = Field(
         default=None,
         description="Only search documents in this category (optional).",
@@ -122,15 +122,22 @@ class SearchRequest(BaseModel):
         default="semantic",
         description="semantic = by meaning (embeddings); keyword = by words (full-text).",
     )
+    chunk_config: Literal["small", "large"] | None = Field(
+        default=None,
+        description="Which chunk size to search (default from server config).",
+    )
 
 
 class SearchHit(BaseModel):
-    """One search result. Scores are only comparable within the same mode."""
+    """One search result: a chunk. Scores are only comparable within the same mode."""
 
+    source_id: str
+    chunk_id: int
     slug: str
     title: str
-    content: str
     category: str
+    chunk_index: int
+    content: str
     score: float
 
 
@@ -141,6 +148,7 @@ class SearchResponse(BaseModel):
     top_k: int
     category: str | None
     mode: str
+    chunk_config: str
     results: list[SearchHit]
     embedding_ms: float
     db_ms: float

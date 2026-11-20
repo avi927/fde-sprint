@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     app_name: str = "FDE Sprint API"
     environment: Literal["dev", "staging", "prod"] = "dev"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    default_chunk_config: Literal["small", "large"] = "small"
 
     # LLM provider secrets
     openai_api_key: SecretStr | None = None

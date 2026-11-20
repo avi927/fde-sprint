@@ -35,7 +35,7 @@ from app.streaming import sse_events
 from app.triage import TriageFailedError, triage_ticket
 from app.db import DatabaseNotConfiguredError
 from app.embeddings import warm_up
-from app.search import search_documents
+from app.search import search_chunks
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -251,21 +251,29 @@ def triage(request: TriageRequest) -> TriageResponse:
 
 @app.post("/search")
 def search(request: SearchRequest) -> SearchResponse:
-    """Search the knowledge base by meaning (semantic) or by words (keyword)."""
-    outcome = search_documents(
-        request.query, request.top_k, request.category, mode=request.mode
+    """Search knowledge base chunks by meaning (semantic) or by words (keyword)."""
+    outcome = search_chunks(
+        request.query,
+        request.top_k,
+        request.category,
+        mode=request.mode,
+        chunk_config=request.chunk_config,
     )
     return SearchResponse(
         query=request.query,
         top_k=request.top_k,
         category=request.category,
         mode=request.mode,
+        chunk_config=outcome.chunk_config,
         results=[
             SearchHit(
+                source_id=hit.source_id,
+                chunk_id=hit.chunk_id,
                 slug=hit.slug,
                 title=hit.title,
-                content=hit.content,
                 category=hit.category,
+                chunk_index=hit.chunk_index,
+                content=hit.content,
                 score=hit.score,
             )
             for hit in outcome.hits

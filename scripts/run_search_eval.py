@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from app.logging_config import setup_logging
-from app.search import search_documents
+from app.search import search_chunks
 
 ROOT = Path(__file__).resolve().parent.parent
 CASES_FILE = ROOT / "evals" / "search_cases.json"
@@ -36,7 +36,7 @@ def evaluate(name: str, options: dict[str, Any], cases: list[dict]) -> dict[str,
     details = []
 
     for case in cases:
-        outcome = search_documents(case["query"], top_k=TOP_K, **options)
+        outcome = search_chunks(case["query"], top_k=TOP_K, **options)
         slugs = [hit.slug for hit in outcome.hits]
         rank = first_relevant_rank(slugs, case["relevant"])
 

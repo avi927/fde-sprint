@@ -1,4 +1,4 @@
-"""Search over the knowledge base: semantic (vectors) or keyword (full-text)."""
+"""Search over knowledge base chunks: semantic (vectors) or keyword (full-text)."""
 
 import logging
 import time
@@ -7,6 +7,7 @@ from typing import Any, Literal
 
 from psycopg.types.json import Jsonb
 
+from app.config import get_settings
 from app.db import get_connection
 from app.embeddings import embed_query
 
@@ -15,14 +16,18 @@ logger = logging.getLogger(__name__)
 SearchMode = Literal["semantic", "keyword"]
 
 SEMANTIC_SQL = """
-SELECT slug,
-       title,
-       content,
-       metadata->>'category' AS category,
-       1 - (embedding <=> %(query_vector)s) AS score
-FROM documents
-{where_clause}
-ORDER BY embedding <=> %(query_vector)s
+SELECT c.id,
+       d.slug,
+       d.title,
+       d.metadata->>'category' AS category,
+       c.chunk_index,
+       c.content,
+       1 - (c.embedding <=> %(query_vector)s) AS score
+FROM chunks c
+JOIN documents d ON d.id = c.document_id
+WHERE c.chunk_config = %(chunk_config)s
+{category_clause}
+ORDER BY c.embedding <=> %(query_vector)s
 LIMIT %(top_k)s
 """
 
@@ -32,69 +37,78 @@ WITH q AS (
                websearch_to_tsquery('english', %(query_text)s)::text, '&', '|'
            )::tsquery AS query
 )
-SELECT slug,
-       title,
-       content,
-       metadata->>'category' AS category,
-       ts_rank_cd(search_tsv, q.query) AS score
-FROM documents, q
-WHERE search_tsv @@ q.query
-{and_clause}
+SELECT c.id,
+       d.slug,
+       d.title,
+       d.metadata->>'category' AS category,
+       c.chunk_index,
+       c.content,
+       ts_rank_cd(c.search_tsv, q.query) AS score
+FROM chunks c
+JOIN documents d ON d.id = c.document_id
+CROSS JOIN q
+WHERE c.chunk_config = %(chunk_config)s
+  AND c.search_tsv @@ q.query
+{category_clause}
 ORDER BY score DESC
 LIMIT %(top_k)s
 """
 
 
 @dataclass(frozen=True)
-class DocumentHit:
-    """One search result (internal shape)."""
+class ChunkHit:
+    """One search result: a chunk of a document (internal shape)."""
 
+    chunk_id: int
     slug: str
     title: str
-    content: str
     category: str
+    chunk_index: int
+    content: str
     score: float
+
+    @property
+    def source_id(self) -> str:
+        """Readable citation ID, e.g. 'returns-guide#2'."""
+        return f"{self.slug}#{self.chunk_index}"
 
 
 @dataclass(frozen=True)
 class SearchOutcome:
-    """The results plus how long each stage took."""
+    """The results, which chunk config was searched, and how long each stage took."""
 
-    hits: list[DocumentHit]
+    hits: list[ChunkHit]
+    chunk_config: str
     embedding_ms: float
     db_ms: float
 
 
-def _category_condition(category: str | None, params: dict[str, Any]) -> str:
-    """Return a fixed SQL condition for the category filter (value goes in params)."""
-    if category is None:
-        return ""
-    params["category_filter"] = Jsonb({"category": category})
-    return "metadata @> %(category_filter)s"
-
-
-def search_documents(
+def search_chunks(
     query: str,
     top_k: int = 5,
     category: str | None = None,
     mode: SearchMode = "semantic",
     use_prefix: bool | None = None,
+    chunk_config: str | None = None,
 ) -> SearchOutcome:
-    """Return the top_k most relevant documents, by meaning (semantic) or by words (keyword)."""
-    params: dict[str, Any] = {"top_k": top_k}
-    condition = _category_condition(category, params)
-    embedding_ms = 0.0
+    """Return the top_k most relevant chunks, by meaning (semantic) or by words (keyword)."""
+    chunk_config = chunk_config or get_settings().default_chunk_config
+    params: dict[str, Any] = {"top_k": top_k, "chunk_config": chunk_config}
 
+    category_clause = ""
+    if category is not None:
+        params["category_filter"] = Jsonb({"category": category})
+        category_clause = "AND d.metadata @> %(category_filter)s"
+
+    embedding_ms = 0.0
     if mode == "semantic":
         start = time.perf_counter()
         params["query_vector"] = embed_query(query, use_prefix=use_prefix)
         embedding_ms = (time.perf_counter() - start) * 1000
-        sql = SEMANTIC_SQL.format(
-            where_clause=f"WHERE {condition}" if condition else ""
-        )
+        sql = SEMANTIC_SQL.format(category_clause=category_clause)
     else:
         params["query_text"] = query
-        sql = KEYWORD_SQL.format(and_clause=f"AND {condition}" if condition else "")
+        sql = KEYWORD_SQL.format(category_clause=category_clause)
 
     start = time.perf_counter()
     with get_connection() as conn:
@@ -102,12 +116,14 @@ def search_documents(
     db_ms = (time.perf_counter() - start) * 1000
 
     hits = [
-        DocumentHit(
-            slug=row[0],
-            title=row[1],
-            content=row[2],
+        ChunkHit(
+            chunk_id=row[0],
+            slug=row[1],
+            title=row[2],
             category=row[3],
-            score=round(float(row[4]), 4),
+            chunk_index=row[4],
+            content=row[5],
+            score=round(float(row[6]), 4),
         )
         for row in rows
     ]
@@ -117,6 +133,7 @@ def search_documents(
         extra={
             "extra_fields": {
                 "mode": mode,
+                "chunk_config": chunk_config,
                 "top_k": top_k,
                 "category": category,
                 "results": len(hits),
@@ -127,5 +144,8 @@ def search_documents(
         },
     )
     return SearchOutcome(
-        hits=hits, embedding_ms=round(embedding_ms, 1), db_ms=round(db_ms, 1)
+        hits=hits,
+        chunk_config=chunk_config,
+        embedding_ms=round(embedding_ms, 1),
+        db_ms=round(db_ms, 1),
     )
