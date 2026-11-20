@@ -1,19 +1,21 @@
-"""Search over knowledge base chunks: semantic (vectors) or keyword (full-text)."""
+"""Search over knowledge base chunks: semantic, keyword or hybrid, with optional reranking."""
 
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Literal
 
 from psycopg.types.json import Jsonb
 
+from app.chunking import chunk_embedding_text
 from app.config import get_settings
 from app.db import get_connection
 from app.embeddings import embed_query
+from app.reranking import score_pairs
 
 logger = logging.getLogger(__name__)
 
-SearchMode = Literal["semantic", "keyword"]
+SearchMode = Literal["semantic", "keyword", "hybrid"]
 
 SEMANTIC_SQL = """
 SELECT c.id,
@@ -28,7 +30,7 @@ JOIN documents d ON d.id = c.document_id
 WHERE c.chunk_config = %(chunk_config)s
 {category_clause}
 ORDER BY c.embedding <=> %(query_vector)s
-LIMIT %(top_k)s
+LIMIT %(limit)s
 """
 
 KEYWORD_SQL = """
@@ -51,7 +53,7 @@ WHERE c.chunk_config = %(chunk_config)s
   AND c.search_tsv @@ q.query
 {category_clause}
 ORDER BY score DESC
-LIMIT %(top_k)s
+LIMIT %(limit)s
 """
 
 
@@ -75,25 +77,27 @@ class ChunkHit:
 
 @dataclass(frozen=True)
 class SearchOutcome:
-    """The results, which chunk config was searched, and how long each stage took."""
+    """The results plus what was searched and how long each stage took."""
 
     hits: list[ChunkHit]
+    mode: str
     chunk_config: str
+    reranked: bool
     embedding_ms: float
     db_ms: float
+    rerank_ms: float
 
 
-def search_chunks(
+def _fetch(
+    mode: Literal["semantic", "keyword"],
     query: str,
-    top_k: int = 5,
-    category: str | None = None,
-    mode: SearchMode = "semantic",
-    use_prefix: bool | None = None,
-    chunk_config: str | None = None,
-) -> SearchOutcome:
-    """Return the top_k most relevant chunks, by meaning (semantic) or by words (keyword)."""
-    chunk_config = chunk_config or get_settings().default_chunk_config
-    params: dict[str, Any] = {"top_k": top_k, "chunk_config": chunk_config}
+    limit: int,
+    category: str | None,
+    chunk_config: str,
+    use_prefix: bool | None,
+) -> tuple[list[ChunkHit], float, float]:
+    """Run one retrieval query. Returns (hits, embedding_ms, db_ms)."""
+    params: dict[str, Any] = {"limit": limit, "chunk_config": chunk_config}
 
     category_clause = ""
     if category is not None:
@@ -127,25 +131,95 @@ def search_chunks(
         )
         for row in rows
     ]
+    return hits, embedding_ms, db_ms
+
+
+def reciprocal_rank_fusion(result_lists: list[list[ChunkHit]], k: int = 60) -> list[ChunkHit]:
+    """Merge ranked lists by rank, not by score: score = sum of 1 / (k + rank)."""
+    fused_scores: dict[int, float] = {}
+    hits_by_id: dict[int, ChunkHit] = {}
+
+    for hits in result_lists:
+        for rank, hit in enumerate(hits, start=1):
+            fused_scores[hit.chunk_id] = fused_scores.get(hit.chunk_id, 0.0) + 1 / (k + rank)
+            hits_by_id.setdefault(hit.chunk_id, hit)
+
+    ranked_ids = sorted(fused_scores, key=fused_scores.get, reverse=True)
+    return [replace(hits_by_id[cid], score=round(fused_scores[cid], 6)) for cid in ranked_ids]
+
+
+def _rerank(query: str, hits: list[ChunkHit]) -> list[ChunkHit]:
+    """Re-score candidates with the cross-encoder and sort by the new score."""
+    passages = [chunk_embedding_text(hit.title, hit.content) for hit in hits]
+    scores = score_pairs(query, passages)
+    rescored = [replace(hit, score=round(score, 4)) for hit, score in zip(hits, scores)]
+    return sorted(rescored, key=lambda hit: hit.score, reverse=True)
+
+
+def search_chunks(
+    query: str,
+    top_k: int = 5,
+    category: str | None = None,
+    mode: SearchMode = "semantic",
+    use_prefix: bool | None = None,
+    chunk_config: str | None = None,
+    rerank: bool = False,
+) -> SearchOutcome:
+    """Two-stage retrieval: fetch candidates (semantic, keyword or hybrid), optionally rerank."""
+    settings = get_settings()
+    chunk_config = chunk_config or settings.default_chunk_config
+
+    # Stage 1 fetches more candidates when something will re-order them afterwards.
+    needs_candidates = rerank or mode == "hybrid"
+    limit = max(top_k, settings.rerank_candidates) if needs_candidates else top_k
+
+    # Stage 1: retrieval
+    if mode == "hybrid":
+        semantic_hits, embedding_ms, db_ms_1 = _fetch(
+            "semantic", query, limit, category, chunk_config, use_prefix
+        )
+        keyword_hits, _, db_ms_2 = _fetch(
+            "keyword", query, limit, category, chunk_config, use_prefix
+        )
+        hits = reciprocal_rank_fusion([semantic_hits, keyword_hits], k=settings.rrf_k)
+        db_ms = db_ms_1 + db_ms_2
+    else:
+        hits, embedding_ms, db_ms = _fetch(
+            mode, query, limit, category, chunk_config, use_prefix
+        )
+
+    # Stage 2: reranking (optional)
+    rerank_ms = 0.0
+    if rerank and hits:
+        start = time.perf_counter()
+        hits = _rerank(query, hits)
+        rerank_ms = (time.perf_counter() - start) * 1000
+
+    hits = hits[:top_k]
 
     logger.info(
         "search_completed",
         extra={
             "extra_fields": {
                 "mode": mode,
+                "reranked": rerank,
                 "chunk_config": chunk_config,
                 "top_k": top_k,
+                "candidates": limit,
                 "category": category,
                 "results": len(hits),
-                "top_score": hits[0].score if hits else None,
                 "embedding_ms": round(embedding_ms, 1),
                 "db_ms": round(db_ms, 1),
+                "rerank_ms": round(rerank_ms, 1),
             }
         },
     )
     return SearchOutcome(
         hits=hits,
+        mode=mode,
         chunk_config=chunk_config,
+        reranked=rerank,
         embedding_ms=round(embedding_ms, 1),
         db_ms=round(db_ms, 1),
+        rerank_ms=round(rerank_ms, 1),
     )

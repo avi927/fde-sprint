@@ -15,8 +15,10 @@ TOP_K = 5
 
 CONFIGS: dict[str, dict[str, Any]] = {
     "keyword": {"mode": "keyword"},
-    "semantic_no_prefix": {"mode": "semantic", "use_prefix": False},
-    "semantic_prefix": {"mode": "semantic", "use_prefix": True},
+    "semantic": {"mode": "semantic"},
+    "hybrid": {"mode": "hybrid"},
+    "semantic+rerank": {"mode": "semantic", "rerank": True},
+    "hybrid+rerank": {"mode": "hybrid", "rerank": True},
 }
 
 

@@ -36,6 +36,7 @@ from app.triage import TriageFailedError, triage_ticket
 from app.db import DatabaseNotConfiguredError
 from app.embeddings import warm_up
 from app.search import search_chunks
+from app.reranking import warm_up_reranker
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -45,7 +46,8 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Runs once at startup (before `yield`) and once at shutdown (after `yield`)."""
     warm_up()
-    logger.info("embedding_model_ready")
+    warm_up_reranker()
+    logger.info("models_ready")
     yield
 
 
@@ -251,20 +253,22 @@ def triage(request: TriageRequest) -> TriageResponse:
 
 @app.post("/search")
 def search(request: SearchRequest) -> SearchResponse:
-    """Search knowledge base chunks by meaning (semantic) or by words (keyword)."""
+    """Search knowledge base chunks: semantic, keyword or hybrid, optionally reranked."""
     outcome = search_chunks(
         request.query,
         request.top_k,
         request.category,
         mode=request.mode,
         chunk_config=request.chunk_config,
+        rerank=request.rerank,
     )
     return SearchResponse(
         query=request.query,
         top_k=request.top_k,
         category=request.category,
-        mode=request.mode,
+        mode=outcome.mode,
         chunk_config=outcome.chunk_config,
+        reranked=outcome.reranked,
         results=[
             SearchHit(
                 source_id=hit.source_id,
@@ -280,4 +284,5 @@ def search(request: SearchRequest) -> SearchResponse:
         ],
         embedding_ms=outcome.embedding_ms,
         db_ms=outcome.db_ms,
+        rerank_ms=outcome.rerank_ms,
     )

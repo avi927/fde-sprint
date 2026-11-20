@@ -51,6 +51,11 @@ class Settings(BaseSettings):
     )
     embedding_cache_dir: Path = PROJECT_ROOT / ".cache" / "fastembed"
 
+    # Retrieval
+    reranker_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
+    rerank_candidates: int = 20
+    rrf_k: int = 60
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -118,13 +118,17 @@ class SearchRequest(BaseModel):
         default=None,
         description="Only search documents in this category (optional).",
     )
-    mode: Literal["semantic", "keyword"] = Field(
+    mode: Literal["semantic", "keyword", "hybrid"] = Field(
         default="semantic",
-        description="semantic = by meaning (embeddings); keyword = by words (full-text).",
+        description="semantic = by meaning; keyword = by words; hybrid = both, fused by rank (RRF).",
     )
     chunk_config: Literal["small", "large"] | None = Field(
         default=None,
         description="Which chunk size to search (default from server config).",
+    )
+    rerank: bool = Field(
+        default=False,
+        description="Re-order candidates with a cross-encoder (more precise, slower).",
     )
 
 
@@ -152,3 +156,5 @@ class SearchResponse(BaseModel):
     results: list[SearchHit]
     embedding_ms: float
     db_ms: float
+    reranked: bool
+    rerank_ms: float

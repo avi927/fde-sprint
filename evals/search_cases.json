@@ -58,5 +58,41 @@
     "query": "app version 4.2 crash",
     "relevant": ["app-crash-cart"],
     "note": "Exact version number plus keywords. Keyword should be strong."
+  },
+  {
+    "id": "negation-exchange",
+    "query": "I do not want a refund, I just want a different size",
+    "relevant": ["returns-guide"],
+    "note": "Negation trap: the exchange rule is in the long returns guide, not the refund policy."
+  },
+  {
+    "id": "opened-electronics-fee",
+    "query": "Is there a fee if I open my headphones and send them back?",
+    "relevant": ["returns-guide"],
+    "note": "Specific fact deep inside a long document (15% restocking fee)."
+  },
+  {
+    "id": "aerosol-air",
+    "query": "Why can't my hairspray be sent by express?",
+    "relevant": ["shipping-guide"],
+    "note": "Requires knowing hairspray is an aerosol; the restriction is in the shipping guide."
+  },
+  {
+    "id": "locked-after-attempts",
+    "query": "I typed my password wrong a few times and now I can't sign in",
+    "relevant": ["account-security-guide"],
+    "note": "Distractor: the reset-password article. The lockout rule is in the security guide."
+  },
+  {
+    "id": "gift-return-secret",
+    "query": "Can I return a present without the person who bought it finding out?",
+    "relevant": ["returns-guide"],
+    "note": "No shared key words with 'gift receipt ... is not notified'."
+  },
+  {
+    "id": "ship-australia",
+    "query": "Do you ship to Australia?",
+    "relevant": ["shipping-guide"],
+    "note": "Only the shipping guide answers this explicitly; international-shipping is a distractor."
   }
 ]
