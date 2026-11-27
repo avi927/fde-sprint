@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 IDK_ANSWER = "I don't know based on the available help articles."
 MAX_ATTEMPTS = 3
-_CITATION = re.compile(r"\[([a-z0-9-]+#\d+)\]")
+_CITATION = re.compile(r"\[([a-z-]+#\d+)\]")
 
 
 class RagFailedError(Exception):

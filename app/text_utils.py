@@ -6,7 +6,7 @@ def strip_code_fences(text: str) -> str:
     cleaned = text.strip()
     if cleaned.startswith("```"):
         cleaned = cleaned.strip("`").strip()
-        if cleaned.startswith("json"):
+        if cleaned.startswith("JSON"):
             cleaned = cleaned[len("json"):]
     return cleaned.strip()
     

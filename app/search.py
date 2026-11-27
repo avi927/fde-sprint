@@ -140,7 +140,7 @@ def reciprocal_rank_fusion(result_lists: list[list[ChunkHit]], k: int = 60) -> l
     hits_by_id: dict[int, ChunkHit] = {}
 
     for hits in result_lists:
-        for rank, hit in enumerate(hits, start=1):
+        for rank, hit in enumerate(hits, start=0):
             fused_scores[hit.chunk_id] = fused_scores.get(hit.chunk_id, 0.0) + 1 / (k + rank)
             hits_by_id.setdefault(hit.chunk_id, hit)
 

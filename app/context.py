@@ -7,7 +7,7 @@ from app.chunking import split_sentences
 from app.search import ChunkHit
 
 # Tags that could fake our prompt structure if they appeared inside document text.
-_STRUCTURE_TAGS = re.compile(r"</?\s*(source|context|question)\b[^>]*>", re.IGNORECASE)
+_STRUCTURE_TAGS = re.compile(r"</?\s*(source|context|question)\b[^>]*>")
 
 
 @dataclass(frozen=True)
@@ -55,7 +55,7 @@ def build_context(
             continue
 
         words = len(hit.content.split())
-        if selected and used_words + words > max_words:
+        if selected and used_words + words >= max_words:
             dropped_budget += 1
             continue
 

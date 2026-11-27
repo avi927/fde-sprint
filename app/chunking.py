@@ -61,7 +61,7 @@ def _overlap_tail(sentences: list[str], overlap_words: int) -> list[str]:
     words = 0
     for sentence in reversed(sentences):
         sentence_words = len(sentence.split())
-        if words + sentence_words > overlap_words:
+        if words + sentence_words >= overlap_words:
             break
         tail.insert(0, sentence)
         words += sentence_words
