@@ -62,6 +62,17 @@ class Settings(BaseSettings):
     rag_rerank: bool = True
     rag_max_context_words: int = 700
 
+    # --- Bug-fix agent: GitHub ---
+    github_personal_access_token: SecretStr | None = None
+    github_owner: str | None = None
+    github_repo: str | None = None
+    github_base_branch: str = "bug-playground"
+
+    # --- Bug-fix agent: Azure DevOps (read-only) ---
+    ado_org: str | None = None
+    ado_project: str | None = None
+    ado_mcp_auth_token: SecretStr | None = None
+
 
 @lru_cache
 def get_settings() -> Settings:

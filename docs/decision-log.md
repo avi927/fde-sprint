@@ -360,3 +360,38 @@ Entries with numbers link to the evidence (eval result files in `evals/results/`
 ### D7-5: requirements.txt saved as plain ASCII
 - **Decision:** `pip freeze | Set-Content -Encoding ascii requirements.txt`
 - **Why:** PowerShell `>` wrote UTF-16, which GitHub shows garbled.
+
+## Day 8 — Sat 28 Nov 2026 (bug-fix agent, project day 3)
+
+### D8-1: MCP Python SDK v2 `Client`, pinned to 2.x
+- **Decision:** `mcp>=2,<3`; one `Client(StdioServerParameters(...))` per server.
+- **Why:** Current stable line; v2 replaces v1's transport + ClientSession + initialize.
+- **Evidence:** GitHub server negotiated 2026-07-28; Azure DevOps server fell back to
+  2025-11-25 automatically.
+
+### D8-2: Each server only gets its own secret
+- **Decision:** Pass tokens through `env=`; the SDK starts servers with an allow-listed
+  environment, so the GitHub server never sees the Azure DevOps token (and vice versa).
+
+### D8-3: Minimal, clean ticket data
+- **Decision:** Request only 7 fields (`fields` argument), unwrap the server's untrusted
+  markers, convert Repro Steps HTML to text, parse into a frozen `BugTicket`; non-Bugs rejected.
+- **Why:** No names/emails ever reach the agent; fewer tokens; predictable input.
+
+### D8-4: Safety layer 2 — deny-by-default tool policy
+- **Decision:** 5 allowed tools (1 Azure DevOps read, 1 GitHub read, 3 GitHub writes).
+  Azure DevOps actions limited to get/list_comments. Our repo only. Writes need approval,
+  branches `bugfix/*` from bug-playground, draft PRs into bug-playground only.
+  Only `app/` may change — never `tests/` (the tests are the judge).
+- **Evidence:** 20 policy tests; live smoke test blocked 5 forbidden calls before any
+  message reached a server.
+
+### D8-5: One hub, least privilege per phase
+- **Decision:** `McpHub` starts both servers (AsyncExitStack), shows the LLM only allowed
+  tools, policy-checks every call, logs metadata only. GitHub server is read-only in the
+  plan phase; pull-request tools only after approval; merge always excluded.
+
+### D8-6: Handle embedded resources in tool results
+- **Decision:** Read text from `TextContent` and `EmbeddedResource` (text resources).
+- **Why:** get_file_contents returns the file as an EmbeddedResource; reading only
+  TextContent silently dropped the file.
