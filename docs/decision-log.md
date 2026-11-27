@@ -276,3 +276,59 @@ Entries with numbers link to the evidence (eval result files in `evals/results/`
   lock-in. Demo showed a chain passing a hallucinated citation that /ask rejects.
 - **Rejected:** Rebuilding on langchain-postgres PGVector (own tables; doesn't fit our
   chunks schema and migrations).
+
+## Day 6 — Thu 26 / Fri 27 Nov 2026 (bug-fix agent, project day 1)
+
+### D6-1: Project = bug-fix agent using official MCP servers
+- **Decision:** Build a Python agent (MCP host + clients) that reads a Bug ticket from
+  Azure Boards, finds related code in GitHub, shows a plan + diff for human approval,
+  and only then opens a DRAFT pull request. Practice in our own repo (fde-sprint) with
+  planted bugs; test tickets in a sandbox project (company organization, admin-approved).
+- **Why:** Real team workflow (tickets in Azure Boards, code in GitHub); teaches MCP
+  client side, agent design, safety, and evals.
+- **Rejected:** Building custom MCP servers now (official servers exist and are maintained);
+  Copilot coding agent integration (paid plans only).
+
+### D6-2: Run both official servers locally over stdio
+- **Decision:** GitHub MCP server via Docker (`ghcr.io/github/github-mcp-server`);
+  Azure DevOps MCP server via `npx @azure-devops/mcp` with `-d core work-items`.
+- **Why:** Local stdio works with our own Python client and a token; small tool lists.
+- **Rejected:** Hosted Azure DevOps server (requires Microsoft Entra sign-in support
+  in the client); hosted GitHub server (not needed yet).
+- **Evidence:** Both connected in MCP Inspector; GitHub server negotiated MCP 2025-11-25.
+
+### D6-3: Least-privilege tokens, 30-day expiry
+- **Decision:** GitHub fine-grained token: only fde-sprint, Contents RW + Pull requests RW.
+  Azure DevOps token: one organization, Work Items (Read) + Project and Team (Read) only.
+  Secrets only in `.env` (git-ignored) and masked session variables; never in commands,
+  code, logs, or chat.
+- **Why:** If a token leaks or the LLM is tricked, the damage is limited by the platform.
+
+### D6-4: "Never merge" and "never touch Azure Boards" enforced in layers
+- **Decision:** Layer 1 — hide tools at the server (`GITHUB_EXCLUDE_TOOLS=merge_pull_request`,
+  toolsets, read-only mode). Layer 2 — our own tool allowlist (Day 3). Layer 3 — platform
+  permissions (read-only Azure DevOps token; branch protection on main, later).
+- **Why:** A prompt saying "don't merge" is not a control; code and permissions are.
+- **Evidence:** Excluding merge_pull_request: 29 → 28 tools. Adding a comment with the
+  Azure DevOps token: "Unauthorized".
+
+### D6-5: Don't rely on GitHub code search; browse folders instead
+- **Decision:** Locate code by listing folders (`get_file_contents` on `app/`) and reading
+  candidate files; add local search later.
+- **Why:** `search_code` returned 0 results (`incomplete_results: true`) for two terms that
+  exist in app/rag.py. Folder listing worked (18 files, with size + sha).
+- **Rejected:** search_code as the main locating step (unreliable for this repo).
+
+### D6-6: Clean and minimize ticket data before the LLM sees it
+- **Decision:** Extract only title, type, state, priority, severity, repro steps, comments,
+  link. Convert Repro Steps from HTML to plain text. Keep the server's untrusted-content
+  markers and add our own delimiters.
+- **Why:** Responses include names, emails and identity IDs the LLM doesn't need (privacy
+  and tokens); ticket text is untrusted input (prompt injection).
+
+### D6-7: Free LLMs only
+- **Decision:** Groq `openai/gpt-oss-120b` (free tier) as the main model; a local Ollama
+  model for comparison on eval day. No free tier that uses data for training on company code.
+- **Why:** Zero cost for the experiment; Groq's 8K tokens/minute limit means sending
+  only relevant code snippets.
+- **Evidence:** try_llm: 200 OK, 99/120 tokens, ~967 ms.
