@@ -332,3 +332,31 @@ Entries with numbers link to the evidence (eval result files in `evals/results/`
 - **Why:** Zero cost for the experiment; Groq's 8K tokens/minute limit means sending
   only relevant code snippets.
 - **Evidence:** try_llm: 200 OK, 99/120 tokens, ~967 ms.
+
+## Day 7 — Fri 27 Nov 2026 (bug-fix agent, project day 2)
+
+### D7-1: Unit tests are the judge of a fix
+- **Decision:** pytest unit tests for pure functions (no DB, no LLM, no network).
+  30 tests on main, all passing. A fix is correct only if its failing tests pass and
+  no other test breaks.
+- **Why:** Deterministic, fast, objective scoring — the agent can verify itself later.
+
+### D7-2: Planted bugs live on a separate branch
+- **Decision:** `bug-playground` branch with 6 planted bugs (8 failing tests); agent PRs
+  target this branch; main stays correct.
+- **Why:** Realistic practice without ever breaking the working app.
+
+### D7-3: No answer key visible to the agent
+- **Decision:** Bugs committed together with a neutral message; agent will not be allowed
+  commit-history tools (get_commit, list_commits, search_commits); the answer key
+  (`evals/bugfix_cases.json`) exists only on main, not on bug-playground.
+- **Why:** Otherwise the eval measures reading git history, not fixing bugs.
+
+### D7-4: Tickets describe symptoms, not fixes
+- **Decision:** 6 Bug tickets written like QA reports (repro steps, expected vs actual,
+  impact), no file names or solutions.
+- **Why:** Finding the right code is part of what we want to measure.
+
+### D7-5: requirements.txt saved as plain ASCII
+- **Decision:** `pip freeze | Set-Content -Encoding ascii requirements.txt`
+- **Why:** PowerShell `>` wrote UTF-16, which GitHub shows garbled.

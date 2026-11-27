@@ -1,0 +1,44 @@
+[
+  {
+    "bug_id": 14098,
+    "name": "chunk-overlap-boundary",
+    "expected_files": ["app/chunking.py"],
+    "failing_tests": ["tests/test_chunking.py::test_next_chunk_repeats_sentences_that_fit_the_overlap_exactly"]
+  },
+  {
+    "bug_id": 14099,
+    "name": "rrf-rank-start",
+    "expected_files": ["app/search.py"],
+    "failing_tests": [
+      "tests/test_search_rrf.py::test_single_list_scores_are_one_over_k_plus_rank",
+      "tests/test_search_rrf.py::test_hit_found_by_both_lists_ranks_first"
+    ]
+  },
+  {
+    "bug_id": 14100,
+    "name": "citation-digits",
+    "expected_files": ["app/rag.py"],
+    "failing_tests": ["tests/test_rag_validation.py::test_extract_citations_accepts_digits_in_the_slug"]
+  },
+  {
+    "bug_id": 14101,
+    "name": "sanitize-case",
+    "expected_files": ["app/context.py"],
+    "failing_tests": ["tests/test_context.py::test_sanitize_removes_structure_tags_in_any_case"]
+  },
+  {
+    "bug_id": 14102,
+    "name": "context-budget-boundary",
+    "expected_files": ["app/context.py"],
+    "failing_tests": ["tests/test_context.py::test_chunk_that_exactly_fills_the_budget_is_kept"]
+  },
+  {
+    "bug_id": 14103,
+    "name": "json-fence",
+    "expected_files": ["app/text_utils.py"],
+    "failing_tests": [
+      "tests/test_text_utils.py::test_json_fence_is_removed",
+      "tests/test_text_utils.py::test_surrounding_whitespace_is_removed"
+    ]
+  }
+]
