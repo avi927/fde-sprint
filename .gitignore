@@ -1,6 +1,7 @@
 .venv/
+.env
 __pycache__/
 *.pyc
 .cache/
 node_modules
-config.bat
+.pytest_cache/
